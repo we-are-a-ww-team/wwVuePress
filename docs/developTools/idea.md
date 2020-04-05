@@ -2,13 +2,11 @@
 
 ## IDEA的下载以及破解
 
-下载旗舰版（Ultimate）
+**下载旗舰版（Ultimate）：**
 
+![1586098329940](./idea.assets/1586098329940.png)
 
-
-## 图片问题
-
-![docker](https://www.funtl.com/assets1/Lusifer_20190113133947.png)
+**破解：**
 
 ## settings
 
@@ -20,11 +18,32 @@ maven设置：
 
 编译版本：
 
-![1586088120772](D:\Alex_Java\vuepress\wykdVuePress\docs\developTools\img\1586088120772.png)
+![1586097795008](./idea.assets/1586097795008.png)
+
+
+
+## 创建一个最简单的maven项目
+
+
+
+## 创建一个最简单的springboot项目
+
+
 
 
 
 ## 快捷键
 
+| 快捷语句 | 完整语句                                 |
+| -------- | ---------------------------------------- |
+| psvm     | public static void main(String[] args){} |
+| sout     | System.out.println("");                  |
 
+IDEA快捷键：
+
+| 快捷键      | 功能                |
+| ----------- | ------------------- |
+| shift+shift | 全局搜索（包括jar） |
+|             |                     |
+|             |                     |
 
