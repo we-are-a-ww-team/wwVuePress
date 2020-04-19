@@ -23,6 +23,7 @@ module.exports = {
           {
             text: '后端技术',
             items: [
+				{ text: 'spring', link: '/spring/' },
 				{ text: 'springboot', link: '/springboot/' },
 				{ text: 'springcloud', link: '/springcloud/' },
 				{ text: 'springcloud alibaba', link: '/springcloudalibaba/' },
@@ -75,6 +76,10 @@ module.exports = {
 				'',
 				'linux',
 				'nginx'
+			],
+			'/spring/':[
+				'',
+				'spring'
 			]
 		}
     }
