@@ -36,7 +36,8 @@ module.exports = {
 			  { text: '开发工具', link: '/developTools/' },
 			  { text: '项目构建', link: '/buildProject/' },
 			  { text: 'Linux相关', link: '/linux/' },
-			  { text: 'Docker容器', link: '/docker/' }
+			  { text: 'Docker容器', link: '/docker/' },
+			  { text: 'go语言', link: '/go/' },
             ]
 		  }
         ],
@@ -75,11 +76,18 @@ module.exports = {
 			'/linux/':[
 				'',
 				'linux',
-				'nginx'
+				'nginx',
+				'vm'
 			],
 			'/spring/':[
 				'',
-				'spring'
+				'spring',
+				'springboot',
+				'springcloud',
+				'springcloudalibaba'
+			],'/go/':[
+				'',
+				'go'
 			]
 		}
     }

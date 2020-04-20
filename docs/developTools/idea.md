@@ -34,16 +34,41 @@ maven设置：
 
 ## 快捷键
 
-| 快捷语句 | 完整语句                                 |
-| -------- | ---------------------------------------- |
-| psvm     | public static void main(String[] args){} |
-| sout     | System.out.println("");                  |
-
-IDEA快捷键：
-
-| 快捷键      | 功能                |
-| ----------- | ------------------- |
-| shift+shift | 全局搜索（包括jar） |
-|             |                     |
-|             |                     |
-
+```
+1.idea快速命令
+	1)psvm			main方法
+	2)sout          System.out.println
+	3)ifn			if(args != null){
+	4)fori			for(int i=0;i<;i++){}
+	
+2.快捷键
+	Ctrl+D     		复制一行
+	Ctrl+X     		删除一行
+	
+	Ctrl+/     		注释行
+	Ctrl+Shift+/    注释段落
+	
+	Ctrl+Alt+L      格式化
+	
+	Alt+insert  	get/set等
+	Alt+enter		自动修正 ,引入class
+	Ctrl+Shift+Space   自动补全代码
+	
+	Ctrl+F7			本类的方法调用
+	Alt+F7			方法调用
+	Ctrl+Alt+B		方法实现
+	
+	Ctrl+Shift+F7	全局检索
+	Ctrl+Shift+R	全局检索替换
+	
+	Shift+F6 		重命名
+	
+	Ctrl+Shift+Backspace     	跳转到上次编辑的地方
+	Ctrl+Alt+ left/right 		返回至上次浏览的位置
+	Ctrl＋F12		显示当前方法的结构
+	
+	Ctrl＋Alt＋T	代码添加try/catch
+	
+	Alt+UP			上下方法间移动
+	Alt+Down		上下方法间移动
+```
