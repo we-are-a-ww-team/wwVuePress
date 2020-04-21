@@ -63,6 +63,12 @@ curl -XGET localhost:80
 
 ## 正向代理与反向代理
 
+参考：https://www.cnblogs.com/taostaryu/p/10547132.html
 
+![img](./nginx.assets/1350514-20190313105354768-2077480083.png)
 
 ## nginx集群实现
+
+使用keepalived实现nginx的高可用
+
+参考： https://www.cnblogs.com/youzhibing/p/7327342.html#!comments

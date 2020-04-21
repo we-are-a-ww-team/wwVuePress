@@ -1,14 +1,80 @@
 # Linux
 
-## 基本操作
+## 文件操作
 
-### 文件操作
+**ls用法**
 
-### 文件查找
+```
+ls -lrS  按大小反序显示文件详细信息
+ls t*    列出当前目录以"t"开头的目录下文件内容
+```
 
-### vi命令
+**文件操作**
 
-### 查看线程
+```
+mkdir　　创建目录
+touch　　创建一个空文件
+
+rm		删除
+	（rm -rf 强制遍历删除文件）
+mv 		移动,重命名
+cp 		复制
+	（cp -r 	递归复制目录）
+```
+
+**文件查找**
+
+```
+find ./ -name nginx
+find /etc -name　'init*'　　在/etc目录找init开头的文件
+```
+
+**文件压缩，解压**
+
+```
+打包命令： 	tar -zcvf test.tar.gz test 	将test文件夹压缩成test.tar.gz
+解压命令：	tar -zxvf test.tar.gz 		将test.tar.gz 文件解压为test目录。
+
+打包命令：	zip -r test.zip test 		将目录打包，生成test.zip文件
+解压命令：	unzip test.zip 				解压为test目录
+```
+
+## 文本操作
+
+**vi命令**
+
+```
+i	切换编辑模式
+ESC 切换命令模式
+:	切换底行命令模式
+	(:wq!  强制保存  	:q!  强制退出)
+```
+
+**文本查看**
+
+```
+tail -n 1000 aaa.log　　显示/etc/services文件最后1000行
+tail -f　aaa.log　监视文件变化
+
+less aaa.log (pageUp上一页，pageDown下一页)
+-i  忽略搜索时的大小写
+-N  显示每行的行号
+
+/字符串：向下搜索“字符串”的功能
+?字符串：向上搜索“字符串”的功能
+n：重复前一个搜索（与 / 或 ? 有关）
+N：反向重复前一个搜索（与 / 或 ? 有关）
+[pagedown]： 向下翻动一页
+[pageup]：   向上翻动一页
+```
+
+
+
+## 查看线程
+
+```
+ps -ef | grep nginx
+```
 
 ## 防火墙firewall
 
