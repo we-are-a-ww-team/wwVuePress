@@ -24,19 +24,19 @@ module.exports = {
             text: '后端技术',
             items: [
 				{ text: 'spring', link: '/spring/' },
-				{ text: 'springboot', link: '/springboot/' },
-				{ text: 'springcloud', link: '/springcloud/' },
-				{ text: 'springcloud alibaba', link: '/springcloudalibaba/' },
+				{ text: 'springboot', link: '/spring/springboot' },
+				{ text: 'springcloud', link: '/spring/springcloud' },
+				{ text: 'springcloud alibaba', link: '/spring/springcloudalibaba' },
 				{ text: '中间件', link: '/middleware/' },
 				{ text: '分布式锁', link: '/middleware/' },
 				{ text: '分布式事务', link: '/middleware/' }
             ]
           },
 		  { text: '其他',  items: [
-			  { text: '开发工具', link: '/developTools/' },
+			  { text: '开发工具', link: '/developTools/idea' },
 			  { text: '项目构建', link: '/buildProject/' },
-			  { text: 'Linux相关', link: '/linux/' },
-			  { text: 'Docker容器', link: '/docker/' },
+			  { text: 'Linux相关', link: '/linux/linux' },
+			  { text: 'Docker容器', link: '/docker/docker' },
 			  { text: 'go语言', link: '/go/' },
             ]
 		  }
@@ -47,7 +47,6 @@ module.exports = {
 				''
 			],
 			'/docker/':[
-				'',
 				'docker',
 				'docker-redis',
 				'docker-jenkins',
@@ -55,7 +54,6 @@ module.exports = {
 			
 			],
 			'/developTools/':[
-				'',
 				'idea'
 			],
 			'/middleware/':[
@@ -74,7 +72,6 @@ module.exports = {
 				'jenkins'
 			],
 			'/linux/':[
-				'',
 				'linux',
 				'nginx',
 				'vm'

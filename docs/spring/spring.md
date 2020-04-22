@@ -23,3 +23,13 @@
 ### 源码构建
 
 ![1587304897783](./spring.assets/1587304897783.png)
+
+### BeanFactory
+
+![ListableBeanFactory](./spring.assets/ListableBeanFactory-1587480527303.png)
+
+![1587480937516](./spring.assets/1587480937516.png)
+
+DispatcherServlet 加载：
+
+![1587481249045](./spring.assets/1587481249045.png)

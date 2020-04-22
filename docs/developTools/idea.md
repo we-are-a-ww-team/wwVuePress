@@ -45,30 +45,29 @@ maven设置：
 	Ctrl+D     		复制一行
 	Ctrl+X     		删除一行
 	
-	Ctrl+/     		注释行
-	Ctrl+Shift+/    注释段落
-	
-	Ctrl+Alt+L      格式化
-	
 	Alt+insert  	get/set等
 	Alt+enter		自动修正 ,引入class
 	Ctrl+Shift+Space   自动补全代码
+	Ctrl＋Alt＋T	   代码添加try/catch
 	
-	Ctrl+F7			本类的方法调用
-	Alt+F7			方法调用
 	Ctrl+Alt+B		方法实现
+	Alt+F7			方法调用
+	Ctrl+F7			本类的方法调用
 	
-	Ctrl+Shift+F7	全局检索
+	Ctrl+N			查找类
+	Ctrl+Shift+F	全局检索（包括源码）
 	Ctrl+Shift+R	全局检索替换
 	
 	Shift+F6 		重命名
 	
-	Ctrl+Shift+Backspace     	跳转到上次编辑的地方
 	Ctrl+Alt+ left/right 		返回至上次浏览的位置
+	Ctrl+Shift+Backspace     	跳转到上次编辑的地方
 	Ctrl＋F12		显示当前方法的结构
-	
-	Ctrl＋Alt＋T	代码添加try/catch
+	Ctrl+H   		查看类的所有继承关系
 	
 	Alt+UP			上下方法间移动
 	Alt+Down		上下方法间移动
+	Ctrl+/     		注释行
+	Ctrl+Shift+/    注释段落
+	Ctrl+Alt+L      格式化
 ```

@@ -48,6 +48,7 @@ i	切换编辑模式
 ESC 切换命令模式
 :	切换底行命令模式
 	(:wq!  强制保存  	:q!  强制退出)
+	(:set nu 显示行号)
 ```
 
 **文本查看**
@@ -73,7 +74,13 @@ N：反向重复前一个搜索（与 / 或 ? 有关）
 ## 查看线程
 
 ```
-ps -ef | grep nginx
+ps -ef | grep nginx   查看进程
+ps -aux
+jps 	查看进程
+
+netstat -natp  	查看网络端口
+
+man 2 select  查看linux内核方法
 ```
 
 ## 防火墙firewall
