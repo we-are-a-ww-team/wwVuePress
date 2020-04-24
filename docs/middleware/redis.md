@@ -90,4 +90,115 @@ zincrby topic:0423 1 art:001  给0423的art001文章增加点击数
 
 ## session共享
 
-## 手写客户端
+## 手写Redis客户端
+
+```java
+package com.wykd.redis.handwriting;
+
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+
+
+public class WWRedisClient {
+
+    private String host;
+    private int port;
+
+    public WWRedisClient(String host, int port) throws IOException {
+       this.host = host;
+       this.port = port;
+    }
+
+    public static void main(String[] args) throws IOException {
+        WWRedisClient redisClient = new WWRedisClient("192.168.113.128", 6379);
+        redisClient.set("hello", "hello redis");
+        System.out.println("取值结果为："+redisClient.get("hello"));
+    }
+
+    public void set(String key, String val) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        sb.append("*3").append("\r\n");		//*3 代表发送命令有3部分：set key value
+        sb.append("$3").append("\r\n");  	//$3 SET的长度为3
+        sb.append("SET").append("\r\n");
+
+        sb.append("$").append(key.getBytes().length).append("\r\n");
+        sb.append(key).append("\r\n");
+
+        sb.append("$").append(val.getBytes().length).append("\r\n");
+        sb.append(val).append("\r\n");
+        System.out.println("发送set命令===>");
+        System.out.println(sb.toString());
+
+        try(Socket socket = new Socket(host, port);
+            OutputStream output = socket.getOutputStream();
+        ){
+            output.write(sb.toString().getBytes());
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public String get(String key) throws IOException {
+        StringBuffer sb = new StringBuffer();
+        sb.append("*2").append("\r\n");
+        sb.append("$3").append("\r\n");
+        sb.append("GET").append("\r\n");
+
+        sb.append("$").append(key.getBytes().length).append("\r\n");
+        sb.append(key).append("\r\n");
+        System.out.println("发送get命令===>");
+        System.out.println(sb.toString());
+
+        try(Socket socket = new Socket(host, port);
+            OutputStream output = socket.getOutputStream();
+            InputStream in = socket.getInputStream();
+        ){
+            output.write(sb.toString().getBytes());
+            byte[] bytes = new byte[1024];
+            in.read(bytes);
+
+            String returnValue = new String(bytes).split("\r\n")[1];
+
+            return returnValue;
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+}
+```
+
+**redis底层命令发送源码：**
+
+```java
+private static void sendCommand(RedisOutputStream os, byte[] command, byte[]... args) {
+        try {
+            os.write((byte)42);
+            os.writeIntCrLf(args.length + 1);
+            os.write((byte)36);
+            os.writeIntCrLf(command.length);
+            os.write(command);
+            os.writeCrLf();
+            byte[][] var3 = args;
+            int var4 = args.length;
+
+            for(int var5 = 0; var5 < var4; ++var5) {
+                byte[] arg = var3[var5];
+                os.write((byte)36);
+                os.writeIntCrLf(arg.length);
+                os.write(arg);
+                os.writeCrLf();
+            }
+
+        } catch (IOException var7) {
+            throw new JedisConnectionException(var7);
+        }
+    }
+```
+
+## 

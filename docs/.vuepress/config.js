@@ -23,6 +23,7 @@ module.exports = {
           {
             text: '后端技术',
             items: [
+				{ text: 'java', link: '/java/java' },
 				{ text: 'spring', link: '/spring/' },
 				{ text: 'springboot', link: '/spring/springboot' },
 				{ text: 'springcloud', link: '/spring/springcloud' },
@@ -37,7 +38,9 @@ module.exports = {
 			  { text: '项目构建', link: '/buildProject/' },
 			  { text: 'Linux相关', link: '/linux/linux' },
 			  { text: 'Docker容器', link: '/docker/docker' },
-			  { text: 'go语言', link: '/go/' },
+			  { text: 'go语言', link: '/go/go' },
+			  { text: 'mysql', link: '/mysql/mysql' },
+			  { text: 'mybatis', link: '/go/mybatis' },
             ]
 		  }
         ],
@@ -83,8 +86,13 @@ module.exports = {
 				'springcloud',
 				'springcloudalibaba'
 			],'/go/':[
-				'',
 				'go'
+			],'/java/':[
+				'java'
+			],'/mysql/':[
+				'mysql'
+			],'/mybatis/':[
+				'mybatis'
 			]
 		}
     }
