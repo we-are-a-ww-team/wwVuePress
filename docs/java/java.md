@@ -29,11 +29,11 @@ s1,s2内容相同,内存地址不同，返回false
 
 ```
 String str1 = "a" + "b";//常量池中的对象
-String str2 = a + b; //在堆上创建的新的对象     
-String str3 = "ab";//常量池中的对象
-System.out.println(str1 == str2);//false
-System.out.println(str1 == str3);//true 
-System.out.println(str2 == str3);//false
+String str2 = "ab";		//常量池中的对象
+String str3 = a + b; 	//在堆上创建的新的对象     
+
+System.out.println(str1 == str2);//true
+System.out.println(str1 == str3);//false 
 ```
 
 String重写equals源码如下：
@@ -66,7 +66,13 @@ public boolean equals(Object anObject) {
 
 1. 常量池：存放**字符串常量**和**基本类型常量**（public static final）。
 2. 栈（stack）：主要保存**基本数据类型**（char、byte、short、int、long、float、double、boolean）
-3. 堆（heap）：用于存储对象
+3. 堆（heap）：用于存储对象（new的对象）
+
+| 属性 | 描述                                                        |
+| ---- | ----------------------------------------------------------- |
+| -Xms | 初始堆内存                                                  |
+| -Xmx | 最大堆内存                                                  |
+| -Xss | 每个线程的堆栈大小，根据jvm规范，一个线程默认最大栈大小为1M |
 
 
 

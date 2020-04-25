@@ -88,7 +88,8 @@ module.exports = {
 			],'/go/':[
 				'go'
 			],'/java/':[
-				'java'
+				'java',
+				'thread'
 			],'/mysql/':[
 				'mysql'
 			],'/mybatis/':[
