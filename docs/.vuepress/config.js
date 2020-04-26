@@ -42,6 +42,10 @@ module.exports = {
 			  { text: 'mysql', link: '/mysql/mysql' },
 			  { text: 'mybatis', link: '/go/mybatis' },
             ]
+		  },
+		  { text: '功能实现',  items: [
+			  { text: '手写系列', link: '/handwriting/' }
+			]
 		  }
         ],
 		sidebarDepth: 2,
