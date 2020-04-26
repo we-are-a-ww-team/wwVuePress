@@ -59,7 +59,7 @@ public class TestThread {
 
 ### 模拟固定大小的线程池
 
- ![线程池流程图](./thread.assets/线程池流程图.jpg)
+ ![线程池流程图](./thread.assets/thread_0426.jpg)
 
 要点：
 

@@ -98,6 +98,8 @@ module.exports = {
 				'mysql'
 			],'/mybatis/':[
 				'mybatis'
+			],'/handwriting/':[
+				''
 			]
 		}
     }
