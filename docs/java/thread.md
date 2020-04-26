@@ -59,10 +59,12 @@ public class TestThread {
 
 ### 模拟固定大小的线程池
 
+ ![线程池流程图](./thread.assets/线程池流程图.jpg)
+
 要点：
 
-> - 线程池包括2部分：存放任务的队列，线程集合
-> - 
+> - 新建一个线程池类，包括2部分：存放任务的阻塞队列，线程集合
+> - 请求应实现Runnable接口，在多线程组中的线程，则可以通过task.run执行任务。
 
 WFixedSizeThreadPool类：
 
