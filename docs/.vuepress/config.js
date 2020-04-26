@@ -96,7 +96,8 @@ module.exports = {
 				'go'
 			],'/java/':[
 				'java',
-				'thread'
+				'thread',
+				'lock'
 			],'/mysql/':[
 				'mysql'
 			],'/mybatis/':[

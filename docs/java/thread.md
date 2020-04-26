@@ -215,3 +215,454 @@ public class App {
 }
 
 ```
+
+## Callable
+
+```java
+package com.wykd.thread;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+
+/**
+ * 	多线程编程
+ * 		Callable
+ * 		线程池
+ * @author Alex
+ */
+public class CallableDemo {
+
+	public static void main(String[] args) {
+		
+		new CallableDemo().feignWykdUser();
+		
+		new CallableDemo().feignWykdUserThread();
+		
+		new CallableDemo().feignWykdUserThreadPool();
+		
+	}
+	
+	ExecutorService executorService = Executors.newFixedThreadPool(2);
+	
+	/**
+	 * 同步执行
+	 * @return
+	 */
+	public Map feignWykdUser() {
+		
+		long start = System.currentTimeMillis();
+		Map returnMap = new HashMap();
+		String result1 = feignGetStringByUserId(100L);
+		returnMap.put("String", result1);
+		String result2 = feignWykdUserHello("hello");
+		returnMap.put("helloInfo", result2);
+		
+		long end = System.currentTimeMillis();
+		System.out.println("总执行时间："+(end-start));
+		
+		returnMap.put("time", end-start);
+		return returnMap;
+	}
+	
+	/**
+	 * 使用了callable
+	 * @return
+	 */
+	public Map feignWykdUserThread() {
+		
+		long start = System.currentTimeMillis();
+		Map returnMap = new HashMap();
+		
+		Callable<String> StringCall = new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				long start = System.currentTimeMillis();
+				String result = feignGetStringByUserId(100L);
+				long end = System.currentTimeMillis();
+				System.out.println("StringCallCall执行时间："+(end-start));
+				return result;
+			}
+		};
+		
+		Callable<String> helloInfoCall = new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				long start = System.currentTimeMillis();
+				String result = feignWykdUserHello("hello");
+				long end = System.currentTimeMillis();
+				System.out.println("helloInfoCall执行时间："+(end-start));
+				return result;
+			}
+		};
+		
+		FutureTask<String> helloInfo = new FutureTask<>(helloInfoCall);
+		FutureTask<String> String = new FutureTask<>(StringCall);
+		
+		new Thread(helloInfo).start();
+		new Thread(String).start();
+		
+		
+		try {
+			returnMap.put("helloInfo", helloInfo.get());
+			returnMap.put("String", String.get());
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		long end = System.currentTimeMillis();
+		System.out.println("总执行时间："+(end-start));
+		returnMap.put("time", end-start);
+		return returnMap;
+	}
+	
+	/**
+	 * 使用了线程池
+	 * @return
+	 */
+	public Map feignWykdUserThreadPool() {
+		long start = System.currentTimeMillis();
+		Map returnMap = new HashMap();
+		
+		Callable<String> StringCall = new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				long start = System.currentTimeMillis();
+				String result = feignGetStringByUserId(100L);
+				long end = System.currentTimeMillis();
+				System.out.println("StringCallCall执行时间："+(end-start));
+				return result;
+			}
+		};
+		
+		Callable<String> helloInfoCall = new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				long start = System.currentTimeMillis();
+				String result = feignWykdUserHello("hello");
+				long end = System.currentTimeMillis();
+				System.out.println("helloInfoCall执行时间："+(end-start));
+				return result;
+			}
+		};
+		
+		FutureTask<String> helloInfo = new FutureTask<>(helloInfoCall);
+		FutureTask<String> String = new FutureTask<>(StringCall);
+		
+		executorService.submit(helloInfo);
+		executorService.submit(String);
+		
+		try {
+			returnMap.put("helloInfo", helloInfo.get());
+			returnMap.put("String", String.get());
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("总共执行时间："+(end-start));
+		returnMap.put("time", end-start);
+		return returnMap;
+	}
+	
+	
+	
+	public String feignGetStringByUserId(long str) {
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "feignGetStringByUserId";
+	}
+	
+	public String feignWykdUserHello(String str) {
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "feignWykdUserHello";
+	}
+}
+
+
+```
+
+## CountDownLatch
+
+```java
+package com.wykd.cwx.latch;
+
+import java.util.Random;
+
+/**
+ * @ClassName Consumer
+ * @Description TODO
+ * @Author maxiao
+ * @Date 2020/3/5 上午11:23
+ * @Version V1.0
+ */
+public class Consumer implements Runnable {
+
+    private Message msg;
+
+    public Consumer(Message msg) {
+        this.msg = msg;
+    }
+
+    public String getKey() {
+        return msg.key;
+    }
+
+    Random random = new Random();
+
+    public Consumer(String key, String code) {
+        msg = new Message();
+        msg.key = key;
+        msg.code = code;
+    }
+
+    @Override
+    public void run() {
+        System.out.println(Thread.currentThread().getName()+"---"+msg.key + "开始消费");
+        try {
+            Thread.sleep(random.nextInt(1000));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(msg.key + ":消费成功");
+
+        Producer producer = TestCyclic.map.get(getKey());
+        producer.setCode(msg.code);
+        //这里表示闭锁，此线程处时完成，切换到发出事件线程。
+        producer.countDownLatch.countDown();
+
+    }
+}
+
+```
+
+
+
+```java
+package com.wykd.cwx.latch;
+
+import java.util.Collection;
+
+/**
+ * @ClassName MainThread
+ * @Description 主线程处理
+ * @Author maxiao
+ * @Date 2020/3/5 下午3:11
+ * @Version V1.0
+ */
+public class MainThread implements Runnable {
+
+    public int count;
+
+    long time;
+
+    public MainThread(int count){
+        this.count=count;
+        time=System.currentTimeMillis();
+    }
+
+    @Override
+    public void run() {
+        boolean flag=true;
+        Collection<Producer> values = TestCyclic.map.values();
+        for (Producer producer:values){
+            if (!producer.flag()){
+                flag=producer.flag();
+            }
+            System.out.println(producer.flag()+"---"+producer.msg);
+        }
+        if (flag){
+            System.out.println("处理成功;"+(System.currentTimeMillis()-time));
+        }else {
+            System.out.println("处理失败;"+(System.currentTimeMillis()-time));
+        }
+    }
+}
+
+```
+
+
+
+```java
+package com.wykd.cwx.latch;
+
+/**
+ * @ClassName Message
+ * @Description TODO
+ * @Author maxiao
+ * @Date 2020/3/5 上午11:27
+ * @Version V1.0
+ */
+public class Message {
+
+    public String key;
+
+    public String code;
+
+    public String value;
+
+    public boolean flag(){
+        return "000".equals(code);
+    }
+
+    @Override
+    public String toString() {
+        return "key:" + key + ",code:" + code + ",value:" + value;
+    }
+}
+
+```
+
+
+
+```java
+package com.wykd.cwx.latch;
+
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @ClassName Producer
+ * @Description TODO
+ * @Author maxiao
+ * @Date 2020/3/5 上午11:22
+ * @Version V1.0
+ */
+public class Producer implements Runnable {
+
+    public Message msg;
+
+    private CyclicBarrier cyclicBarrier;
+
+    CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    Random random = new Random();
+
+    public Producer(String key) {
+        msg = new Message();
+        msg.key = key;
+    }
+
+    public String getKey() {
+        return msg.key;
+    }
+
+    public void setCode(String code) {
+        msg.code = code;
+    }
+
+    public Producer(String key, CyclicBarrier cyclicBarrier) {
+        msg = new Message();
+        msg.key = key;
+        this.cyclicBarrier = cyclicBarrier;
+    }
+
+    public boolean flag(){
+        return msg.flag();
+    }
+
+    @Override
+    public void run() {
+        TestCyclic.map.put(getKey(), this);
+        System.out.println(Thread.currentThread().getName()+"---"+getKey() + ":发送事件");
+        try {
+            //这里采用闭锁的线程切换功能。
+            countDownLatch.await(1500, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        System.out.println("唤起线程："+Thread.currentThread().getName());
+        System.out.println("msg:"+msg);
+
+        // 等待所有任务准备就绪
+        try {
+            cyclicBarrier.await(2000,TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
+}
+
+```
+
+
+
+```java
+package com.wykd.cwx.latch;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * @ClassName TestCyclic
+ * @Description TODO
+ * @Author maxiao
+ * @Date 2020/3/5 上午11:25
+ * @Version V1.0
+ */
+public class TestCyclic {
+
+    public static Map<String,Producer> map=new HashMap<>();
+    public static Map<String, CountDownLatch> latchMap=new HashMap<>();
+
+    public static void main(String[] args) {
+        int counts = 3;//线程大小
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(counts, new MainThread(counts));
+        ExecutorService executorService = Executors.newFixedThreadPool(counts);
+        executorService.execute(new Producer("111",cyclicBarrier));
+        executorService.execute(new Producer("222",cyclicBarrier));
+        executorService.execute(new Producer("333",cyclicBarrier));
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("下面模拟接收消费----------------");
+
+        ExecutorService executorService1 = Executors.newFixedThreadPool(counts);
+        executorService1.execute(new Consumer("333","000"));
+        executorService1.execute(new Consumer("111","000"));
+        //executorService1.execute(new Consumer("222","000"));
+
+        executorService.shutdown();
+        executorService1.shutdown();
+    }
+
+}
+
+```
+
