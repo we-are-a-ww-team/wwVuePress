@@ -23,29 +23,32 @@ module.exports = {
           {
             text: '后端技术',
             items: [
-				{ text: 'java', link: '/java/java' },
-				{ text: 'spring', link: '/spring/' },
-				{ text: 'springboot', link: '/spring/springboot' },
-				{ text: 'springcloud', link: '/spring/springcloud' },
-				{ text: 'springcloud alibaba', link: '/spring/springcloudalibaba' },
+				{ text: 'Java基础', link: '/java/java' },
+				{ text: 'Spring', link: '/spring/' },
+				{ text: 'Springboot', link: '/spring/springboot' },
+				{ text: 'Springcloud', link: '/spring/springcloud' },
+				{ text: 'Springcloud alibaba', link: '/spring/springcloudalibaba' },
 				{ text: '中间件', link: '/middleware/' },
 				{ text: '分布式锁', link: '/middleware/' },
-				{ text: '分布式事务', link: '/middleware/' }
+				{ text: '分布式事务', link: '/middleware/' },
+				{ text: 'Mybatis', link: '/go/mybatis' },
             ]
           },
+		  { text: '功能实现',  items: [
+			  { text: '手写系列', link: '/handwriting/' },
+			  { text: '接口加密解密', link: '/encrypt/' },
+			  { text: '单点登录', link: '/sso/' },
+			]
+		  },
 		  { text: '其他',  items: [
-			  { text: '开发工具', link: '/developTools/idea' },
-			  { text: '项目构建', link: '/buildProject/' },
 			  { text: 'Linux相关', link: '/linux/linux' },
 			  { text: 'Docker容器', link: '/docker/docker' },
-			  { text: 'go语言', link: '/go/go' },
-			  { text: 'mysql', link: '/mysql/mysql' },
-			  { text: 'mybatis', link: '/go/mybatis' },
+			  { text: '数据库', link: '/mysql/mysql' },
+			  { text: '开发工具', link: '/developTools/idea' },
+			  { text: '项目构建', link: '/buildProject/' },
+			  { text: 'Go语言', link: '/go/go' },
+			  
             ]
-		  },
-		  { text: '功能实现',  items: [
-			  { text: '手写系列', link: '/handwriting/' }
-			]
 		  }
         ],
 		sidebarDepth: 2,
@@ -99,6 +102,10 @@ module.exports = {
 			],'/mybatis/':[
 				'mybatis'
 			],'/handwriting/':[
+				''
+			],'/sso/':[
+				''
+			],'/encrypt/':[
 				''
 			]
 		}
