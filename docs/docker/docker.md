@@ -8,13 +8,13 @@ Docker 可以让开发者可以打包他们的应用以及依赖包到一个可�
 
 容器是完全使用沙箱机制，相互之间不会有任何接口,更重要的是容器性能开销极低。
 
-## 比较Docker与虚拟机
+## Docker与虚拟机
 
-## docker镜像与容器
+## 镜像与容器
 
 
 
-## 常见命令
+## docker常见命令
 
 ```
 service docker start
@@ -50,19 +50,19 @@ docker pull jenkinsci/blueocean
 --创建docker实例	
 docker run --name jenkinsci-blueocean -u root --rm  -d -p 7005:8080 -p 50000:50000 -v /data/jenkins:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock jenkinsci/blueocean
 
-# docker 安装redis
+## docker安装redis
 
 cd /wangwei/app/redis-5.0.4/
 
-## 启动redis
+### 启动redis
 
 src/redis-server redis6380.conf
 
-## 启动哨兵
+### 启动哨兵
 
 src/redis-server sentinel.conf --sentinel
 
-## 连接服务器
+### 连接服务器
 
 src/redis-cli -p 6380 -h 172.18.74.148 -a wangwei2048
 

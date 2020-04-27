@@ -69,6 +69,7 @@ module.exports = {
 				'redis',
 				'rocketmq',
 				'elasticsearch',
+				'shardingjdbc',
 				'kafka'
 			],
 			'/buildProject/':[
@@ -105,6 +106,10 @@ module.exports = {
 				''
 			],'/encrypt/':[
 				''
+			],'/distributedLock/':[
+				'distributedLock'
+			],'/distributedTransaction/':[
+				'distributedTransaction'
 			]
 		}
     }
