@@ -1,6 +1,8 @@
 # Spring 
 
-## Spring模块组成
+## Spring5模块结构图
+
+![1587300521588](./spring.assets/1587300521588.png)
 
 ### Spring模块介绍
 
