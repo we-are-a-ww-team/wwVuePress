@@ -59,6 +59,7 @@ maven设置：
 	Ctrl+Shift+R	全局检索替换
 	
 	Shift+F6 		重命名
+	Alt+Shift+↑   	代码往上移动一行
 	
 	Ctrl+Alt+ left/right 		返回至上次浏览的位置
 	Ctrl+Shift+Backspace     	跳转到上次编辑的地方
