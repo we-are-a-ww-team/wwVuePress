@@ -32,6 +32,8 @@ module.exports = {
 				{ text: '分布式锁', link: '/distributedLock/distributedLock' },
 				{ text: '分布式事务', link: '/distributedTransaction/distributedTransaction' },
 				{ text: 'Mybatis', link: '/mybatis/mybatis' },
+				{ text: 'Netty', link: '/netty/netty' },
+				{ text: '设计模式', link: '/designerPattern/designerPattern' },
             ]
           },
 		  { text: '功能实现',  items: [
@@ -39,6 +41,9 @@ module.exports = {
 			  { text: '接口加密解密', link: '/encrypt/' },
 			  { text: '单点登录', link: '/sso/' },
 			  { text: '动态数据源', link: '/dynamicDBSource/' },
+			  { text: '服务器推送技术', link: '/server2client/server2client' },
+			  { text: '定时任务', link: '/schedule/' },
+			  { text: '辅助类', link: '/util/' },
 			]
 		  },
 		  { text: '其他',  items: [
@@ -93,7 +98,9 @@ module.exports = {
 				'go'
 			],'/java/':[
 				'java',
-				'thread'
+				'thread',
+				'jdk8',
+				'io'
 			],'/database/':[
 				'mysql',
 				'oracle',
@@ -110,6 +117,8 @@ module.exports = {
 				'distributedLock'
 			],'/distributedTransaction/':[
 				'distributedTransaction'
+			],'/server2client/':[
+				'server2client'
 			]
 		}
     }

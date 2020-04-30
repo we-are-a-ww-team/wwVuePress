@@ -255,3 +255,12 @@ docker run -d -p 10911:10911 -p 10909:10909\
 安装rocketmq-console容器
 
 docker run --name rmqconsole -e "JAVA_OPTS=-Drocketmq.namesrv.addr=192.168.113.129:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false" -p 8099:8080 -t styletang/rocketmq-console-ng
+
+
+
+
+
+## docker安装Mysql
+
+主从同步
+
