@@ -670,5 +670,5 @@ public class TestCyclic {
 
 参考：https://www.cnblogs.com/KingJack/p/10599921.html
 
-![ThreadLocal理解](./thread.assets/ThreadLocal理解.jpg)
+![ThreadLocal理解](./thread.assets/ThreadLocal.jpg)
 
