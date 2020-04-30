@@ -672,3 +672,110 @@ public class TestCyclic {
 
 ![ThreadLocal理解](./thread.assets/ThreadLocal.jpg)
 
+> set方法源码解读：
+
+```java
+public void set(T value) {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);
+    else
+        createMap(t, value);
+}
+
+void createMap(Thread t, T firstValue) {
+      t.threadLocals = new ThreadLocalMap(this, firstValue);
+}
+ThreadLocalMap getMap(Thread t) {
+      return t.threadLocals;
+}
+
+```
+
+```java
+ThreadLocalMap(ThreadLocal<?> firstKey, Object firstValue) {
+    table = new Entry[INITIAL_CAPACITY];
+    int i = firstKey.threadLocalHashCode & (INITIAL_CAPACITY - 1);
+    table[i] = new Entry(firstKey, firstValue);
+    size = 1;
+    setThreshold(INITIAL_CAPACITY);
+}
+
+ private void set(ThreadLocal<?> key, Object value) {
+
+     // We don't use a fast path as with get() because it is at
+     // least as common to use set() to create new entries as
+     // it is to replace existing ones, in which case, a fast
+     // path would fail more often than not.
+
+     Entry[] tab = table;
+     int len = tab.length;
+     int i = key.threadLocalHashCode & (len-1);
+
+     for (Entry e = tab[i];
+          e != null;
+          e = tab[i = nextIndex(i, len)]) {
+         ThreadLocal<?> k = e.get();
+
+         if (k == key) {
+             e.value = value;
+             return;
+         }
+
+         if (k == null) {
+             replaceStaleEntry(key, value, i);
+             return;
+         }
+     }
+
+     tab[i] = new Entry(key, value);
+     int sz = ++size;
+     if (!cleanSomeSlots(i, sz) && sz >= threshold)
+         rehash();
+ }
+```
+
+> Get方法解读
+>
+> 
+
+```java
+public T get() {
+        Thread t = Thread.currentThread();
+        ThreadLocalMap map = getMap(t);
+        if (map != null) {
+            ThreadLocalMap.Entry e = map.getEntry(this);
+            if (e != null) {
+                @SuppressWarnings("unchecked")
+                T result = (T)e.value;
+                return result;
+            }
+        }
+    	//若未取到值，则调用set方法，并返回初始值
+        return setInitialValue();
+    }
+
+private T setInitialValue() {
+        T value = initialValue();  	//获取初始值
+        Thread t = Thread.currentThread();
+        ThreadLocalMap map = getMap(t);
+        if (map != null)
+            map.set(this, value);
+        else
+            createMap(t, value);
+        return value;
+    }
+```
+
+```java
+private Entry getEntry(ThreadLocal<?> key) {
+            int i = key.threadLocalHashCode & (table.length - 1);
+            Entry e = table[i];
+            if (e != null && e.get() == key)
+                return e;
+            else
+                return getEntryAfterMiss(key, i, e);
+        }
+```
+
