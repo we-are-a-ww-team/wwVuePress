@@ -41,3 +41,13 @@ DispatcherServlet 加载：
 ## Import的三种方式
 
 参考：https://blog.csdn.net/everyok/article/details/81350905
+
+
+
+## **Spring源码构建：**
+
+参考：https://www.cnblogs.com/enjoyjava/p/11622555.html
+
+**查看构建spring-framework的gradle的版本**
+
+https://blog.csdn.net/chenweijiSun/article/details/104814564

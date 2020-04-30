@@ -71,4 +71,7 @@ maven设置：
 	Ctrl+/     		注释行
 	Ctrl+Shift+/    注释段落
 	Ctrl+Alt+L      格式化
+	
+	Alt+鼠标左键	  纵列选择：
+	Ctrl+Shirt+u	大小写转换：
 ```
