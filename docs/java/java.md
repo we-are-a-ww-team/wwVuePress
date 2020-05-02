@@ -84,3 +84,115 @@ public boolean equals(Object anObject) {
 
 ## LindedList双向链表的使用
 [https://www.cnblogs.com/yijinqincai/p/10964188.html](https://note.youdao.com/)
+
+
+
+## 编码解码Encoding
+
+```java
+package com.wykd.encoding;
+
+import com.alibaba.fastjson.JSON;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+
+public class TestEncoding {
+
+	public static void main(String[] args) {
+
+		try {
+			System.out.println("-----------------ASCII定义的128个字符中，a的十进制码为97，A的十进制码为65");
+			byte[] aaa = new byte[0];
+			aaa = "aA".getBytes("utf-8");
+			for (int j = 0; j < aaa.length ; j++) {
+				System.out.print(aaa[j]+" ");
+			}
+			System.out.println("");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		//默认编码格式
+		System.out.println("---------------------");
+		System.out.println(Charset.defaultCharset().name()+"   <======默认编码");
+		System.out.println(System.getProperty("file.encoding"));
+
+		try {
+			System.out.println("-----------------------");
+			System.out.println("国".getBytes("ISO-8859-1").length+"   <======一个中文字ISO-8859-1编码 占用1个字节");
+			System.out.println("国".getBytes("GBK").length+"   <======一个中文字GBK编码占2个字节");
+			System.out.println("国".getBytes("UTF-8").length+"   <======一个中文字UTF-8编码占3个字节");
+			//结论：一个中文字，ISO-8859-1 占用1个字节，GBK占2个字节，UTF-8占3个字节
+			
+			System.out.println("----------------------- ISO-8859-1编码 ，1个中文占1个字节");
+			byte[] guo = "国".getBytes("ISO-8859-1");
+			for (int i = 0; i < guo.length; i++) {
+				System.out.print(guo[i]+" ");
+			}
+			System.out.println("");
+			//ISO-8859-1没有中文标准，解码出现乱码
+			System.out.println(new String(guo,"ISO-8859-1") +"   <======ISO-8859-1没有中文标准，即使用ISO-8859-1解码,仍然会出现乱码");
+
+
+			System.out.println("----------------------- GBK编码 ，1个中文占2个字节");
+
+			byte[] guoGbk = "国".getBytes("GBK");
+			for (int g = 0; g < guoGbk.length; g++) {
+				System.out.print(guoGbk[g]+" ");
+			}
+			System.out.println("");
+			System.out.println(new String(guoGbk,"GBK") +"   <======用GBK解码");
+			System.out.println(new String(guoGbk,"UTF-8") +"   <======用utf8解码，出现乱码");
+
+			System.out.println("----------------------- UTF-8编码，1个中文占3个字节");
+			byte[] guo2 = "国".getBytes("UTF-8");
+			for (int i = 0; i < guo2.length; i++) {
+				System.out.print(guo2[i]+" ");
+			}
+			System.out.println("");
+			//ISO-8859-1没有中文标准，解码出现乱码
+			System.out.println(new String(guo2,"UTF-8")+"   <======用UTF-8解码");
+			System.out.println(new String(guo2,"GBK")+"   <======用GBK解码，出现乱码");
+			
+			System.out.println("----------------------- ");
+			String str = new String("国".getBytes("UTF-8"),"ISO-8859-1");
+			System.out.println(new String(str.getBytes("ISO-8859-1"),"UTF-8") + "   <======先用UTF-8获取字节数组，转换成ISO-8859-1传输;再用ISO-8859-1获取字节数组，转换utf-8，成功得到最终的值!");
+			
+			
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}
+
+```
+
+```
+执行结果如下：
+
+-----------------ASCII定义的128个字符中，a的十进制码为97，A的十进制码为65
+97 65 
+---------------------
+UTF-8   <======默认编码
+UTF-8
+-----------------------
+1   <======一个中文字ISO-8859-1编码 占用1个字节
+2   <======一个中文字GBK编码占2个字节
+3   <======一个中文字UTF-8编码占3个字节
+----------------------- ISO-8859-1编码 ，1个中文占1个字节
+63 
+?   <======ISO-8859-1没有中文标准，即使用ISO-8859-1解码,仍然会出现乱码
+----------------------- GBK编码 ，1个中文占2个字节
+-71 -6 
+国   <======用GBK解码
+��   <======用utf8解码，出现乱码
+----------------------- UTF-8编码，1个中文占3个字节
+-27 -101 -67 
+国   <======用UTF-8解码
+鍥�   <======用GBK解码，出现乱码
+----------------------- 
+国   <======先用UTF-8获取字节数组，转换成ISO-8859-1传输;再用ISO-8859-1获取字节数组，转换utf-8，成功得到最终的值!
+```
+

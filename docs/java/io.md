@@ -1,14 +1,18 @@
 # IO流
 
-## BIO
+> BIO，同步阻塞IO
+>
+> NIO，同步非阻塞IO，（线程池）
+>
+> AIO（NIO2），异步非阻塞IO，（事件驱动，回调）
 
-**常用IO流：**
+## **常用BIO流：**
 
 ![io流](./io.assets/io.jpg)
 
-### InputStream OutputStream
+## Client-Server通讯
 
-#### 普通版
+### BIO-普通版
 
 ```java
 //服务端代码示例：
@@ -118,7 +122,7 @@ public class InputStreamClient {
 
 
 
-#### 线程池增强版
+### BIO-线程池增强版
 
 > 服务端增加线程池，每个客户端的连接，由线程池分配一个线程进行数据接收。
 
@@ -276,9 +280,9 @@ public class InputStreamClient2 {
 接收到客户端消息===>hello world 02
 ```
 
-#### 多路复用增强版
+### NIO-普通版
 
-> 采用nio，模拟多路复用
+> 采用nio，无选择器
 
 ```java
 //服务端代码：
@@ -413,13 +417,202 @@ hello world 01
 hello world 02
 ```
 
-### FileInputStream OutputStream
+### NIO-选择器增强版
+
+```java
+//服务端
+package com.wykd.nio;
+
+import com.alibaba.fastjson.JSON;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
+
+public class NioServer {
+
+    //监听的端口
+    private int port;
+
+    //选择器
+    private Selector selector;
+
+    private ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+
+    public static void main(String[] args) {
+        new NioServer(8080).listen();
+    }
+
+
+    /**
+     * 构造方法，初始化服务端
+     * @param port
+     */
+    public NioServer(int port){
+
+        this.port = port;
+
+        try {
+            //1.开启一个服务端
+            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+
+            //2.绑定端口
+            SocketAddress inetSocketAddress = new InetSocketAddress(port) ;
+            serverSocketChannel.bind(inetSocketAddress);
+            serverSocketChannel.configureBlocking(false);
+
+            //3.开启一个选择器
+            selector = Selector.open();
+
+            //4.将服务端注册到选择器, 并设置为接收模式
+            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    /**
+     * 开始监听
+     */
+    public void listen(){
+
+        try {
+            while (true) {
+
+                selector.select();
+                Set<SelectionKey> keys =  selector.selectedKeys();
+
+                System.out.println("========>"+JSON.toJSONString(keys));
+
+                Iterator<SelectionKey> keysIterator = keys.iterator();
+                //循环处理 ，每个key代表一种状态
+                while(keysIterator.hasNext()){
+                    SelectionKey key = keysIterator.next();
+                    process(key);
+                    keysIterator.remove();
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 业务逻辑处理
+     * @param key
+     */
+    private void process(SelectionKey key) throws IOException {
+
+        if(key.isAcceptable()){
+            //可接收的状态，获取的是服务端Channel
+            ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
+            SocketChannel socketChannel = serverSocketChannel.accept();
+            socketChannel.configureBlocking(false);
+
+            //数据准备就绪，将客户端注册到选择器，并设置为可读
+            key = socketChannel.register(selector,SelectionKey.OP_READ);
+
+        }else if(key.isReadable()){
+            //可读的状态，获取的是客户端Channel
+            SocketChannel socketChannel = (SocketChannel) key.channel();
+            int len = socketChannel.read(byteBuffer);
+
+            if(len>0){
+                byteBuffer.flip();
+                String content = new String(byteBuffer.array(),0,len);
+
+                //将客户端注册为可写
+                key = socketChannel.register(selector,SelectionKey.OP_WRITE);
+                key.attach(content);
+
+                System.out.println(content);
+            }
+        }else if(key.isWritable()){
+            //可写的状态，获取的是客户端Channel
+            SocketChannel socketChannel = (SocketChannel) key.channel();
+            String content = (String) key.attachment();
+            socketChannel.write(ByteBuffer.wrap(content.getBytes()));
+            socketChannel.close();
+        }
+    }
+}
+
+```
+
+```java
+//客户端
+package com.wykd.nio;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+
+public class NioClient {
+
+    public static void main(String[] args) {
+        startClient();
+    }
+
+    public static void startClient() {
+        try (
+                Socket socket = new Socket("localhost", 8080);
+                OutputStream out = socket.getOutputStream();
+                InputStream in = socket.getInputStream();
+        ) {
+
+            System.out.println("向服务端发送消息！");
+            out.write("hello world".getBytes());
+            out.flush();
+
+            socket.shutdownOutput();  //该句话非常关键，不关闭输出流的话，但不会关闭socket连接，服务端会一直阻塞在读取方法。
+
+            byte[] bytes = new byte[2048];
+            int len = 0;
+            String result = "";
+            while ((len = in.read(bytes)) != -1) {
+                result += new String(bytes, 0, len);
+            }
+            System.out.println("接收到服务端消息===>" + result);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+```
+
+```
+分别启动服务端，以及客户端，输出结果为：
+
+========>[{"acceptable":true,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":false}]
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false}]
+hello world
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true}]
+```
+
+## 文件复制（9种实现方式）
 
 ```java
 //代码示例：
 package com.wykd.bio.fileinputstream;
 
+import com.google.common.io.Files;
+
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 public class TestFileCopy {
 
@@ -427,31 +620,39 @@ public class TestFileCopy {
     public static void main(String[] args) throws IOException {
         long start1 = System.currentTimeMillis();
         copy01(new File("d:\\copy/src.txt"), new File("d:\\copy/desc1.txt"));
-        System.out.println("copy01耗时===>"+(System.currentTimeMillis()-start1));
+        System.out.println("copy01耗时===>"+(System.currentTimeMillis()-start1)+"===>字节流，每次读取1字节");
 
         long start2 = System.currentTimeMillis();
         copy02(new File("d:\\copy/src.txt"), new File("d:\\copy/desc2.txt"));
-        System.out.println("copy02耗时===>"+(System.currentTimeMillis()-start2));
+        System.out.println("copy02耗时===>"+(System.currentTimeMillis()-start2)+"===>字节流，每次读取1字节数组");
 
         long start3 = System.currentTimeMillis();
         copy03(new File("d:\\copy/src.txt"), new File("d:\\copy/desc3.txt"));
-        System.out.println("copy03耗时===>"+(System.currentTimeMillis()-start3));
+        System.out.println("copy03耗时===>"+(System.currentTimeMillis()-start3)+"===>字节缓冲流，每次读取1字节");
 
         long start4 = System.currentTimeMillis();
         copy04(new File("d:\\copy/src.txt"), new File("d:\\copy/desc4.txt"));
-        System.out.println("copy04耗时===>"+(System.currentTimeMillis()-start4));
+        System.out.println("copy04耗时===>"+(System.currentTimeMillis()-start4)+"===>字节缓冲流，每次读取1字节数组,数组长度为1024");
 
         long start5 = System.currentTimeMillis();
         copy05(new File("d:\\copy/src.txt"), new File("d:\\copy/desc5.txt"));
-        System.out.println("copy05耗时===>"+(System.currentTimeMillis()-start5));
+        System.out.println("copy05耗时===>"+(System.currentTimeMillis()-start5)+"===>字节缓冲流，每次读取1字节数组,数组长度为2048");
 
         long start6 = System.currentTimeMillis();
         copy06(new File("d:\\copy/src.txt"), new File("d:\\copy/desc6.txt"));
-        System.out.println("copy06耗时===>"+(System.currentTimeMillis()-start6));
+        System.out.println("copy06耗时===>"+(System.currentTimeMillis()-start6)+"===>字符缓冲流");
 
         long start7 = System.currentTimeMillis();
         copy07(new File("d:\\copy/src.txt"), new File("d:\\copy/desc7.txt"));
-        System.out.println("copy07耗时===>"+(System.currentTimeMillis()-start7));
+        System.out.println("copy07耗时===>"+(System.currentTimeMillis()-start7)+"===>转换流，转换成字符流");
+
+        long start8 = System.currentTimeMillis();
+        copy08(new File("d:\\copy/src.txt"), new File("d:\\copy/desc8.txt"));
+        System.out.println("copy08耗时===>"+(System.currentTimeMillis()-start8)+"===>Files.copy方法");
+
+        long start9 = System.currentTimeMillis();
+        copy09(new File("d:\\copy/src.txt"), new File("d:\\copy/desc9.txt"));
+        System.out.println("copy09耗时===>"+(System.currentTimeMillis()-start9)+"===>FileChannel零拷贝");
     }
 
     /*
@@ -556,7 +757,7 @@ public class TestFileCopy {
      */
     public static void copy07(File src ,File dest) throws IOException {
         InputStreamReader isr = new InputStreamReader(new FileInputStream(src),"utf-8");
-        OutputStreamWriter osw= new OutputStreamWriter(new FileOutputStream(dest),"utf-8")
+        OutputStreamWriter osw= new OutputStreamWriter(new FileOutputStream(dest),"utf-8");
         BufferedReader bfr = new BufferedReader(isr);
         BufferedWriter bfw = new BufferedWriter(osw);
         String line = null;
@@ -566,21 +767,70 @@ public class TestFileCopy {
         bfr.close();
         bfw.close();
     }
+
+    /**
+     * 用Files的copy方法
+     * @param src
+     * @param dest
+     * @throws IOException
+     */
+    public static void copy08(File src ,File dest) throws IOException {
+        Files.copy(src,dest);
+    }
+
+    /**
+     * 使用FileChannel复制文件，零拷贝，跳过jvm内存，直接操作操作系统的内存
+     * @param src
+     * @param dest
+     * @throws IOException
+     */
+    public static void copy09(File src ,File dest) throws IOException {
+
+        FileInputStream fis = new FileInputStream(src);
+        FileOutputStream fos = new FileOutputStream(dest);
+
+        FileChannel fcin = fis.getChannel();
+        FileChannel fcout = fos.getChannel();
+
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+
+        while(true){
+            buffer.clear();
+            int r = fcin.read(buffer);
+            if(r == -1){
+                break;
+            }
+            buffer.flip();
+            fcout.write(buffer);
+        }
+
+    }
 }
-```
 
 ```
-复制一个12M的文件，执行结果如下：
 
-copy01耗时===>34636
-copy02耗时===>63
-copy03耗时===>254
-copy04耗时===>23
-copy05耗时===>20
-copy06耗时===>128
-copy07耗时===>86
+```
+复制一个10M的文件，执行结果如下：
+
+copy01耗时===>35400===>字节流，每次读取1字节
+copy02耗时===>52===>字节流，每次读取1字节数组
+copy03耗时===>218===>字节缓冲流，每次读取1字节
+copy04耗时===>18===>字节缓冲流，每次读取1字节数组,数组长度为1024
+copy05耗时===>19===>字节缓冲流，每次读取1字节数组,数组长度为2048
+copy06耗时===>123===>字符缓冲流
+copy07耗时===>88===>转换流，转换成字符流
+copy08耗时===>47===>Files.copy方法
+copy09耗时===>76===>FileChannel零拷贝
 ```
 
 
 
-## NIO
+## NIO流概念
+
+> Channel，管道
+>
+> Buffer，缓冲区
+>
+> Selector，选择器
+
+## 
