@@ -6,8 +6,6 @@
 
 分页
 
-
-
 ```
 <dependency>
             <groupId>com.baomidou</groupId>
@@ -580,4 +578,309 @@ public class DbUtil {
 
 ## 手写连接池
 
+```java
+//JDBC连接
+package com.wykd.dbpool.pool;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class JDBCUtil {
+    public static final String URL = "jdbc:mysql://120.24.87.121:3307/dbpool";
+    public static final String USER = "root";
+    public static final String PASSWORD = "root";
+
+    static{
+        //加载驱动程序
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 创建数据库连接
+     */
+    public static Connection createConnection(){
+        try {
+            System.out.println("创建新连接");
+            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            return conn;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+```
+
+```java
+//连接池接口类
+package com.wykd.dbpool.pool;
+
+import java.sql.Connection;
+
+public interface DBPool {
+
+    public void setMaxSize(int maxSize) ;
+
+    public void init();
+
+    public void destory();
+
+    public Connection getConnection();
+
+    public void releaseConn(Connection connection);
+
+}
+
+```
+
+```java
+//mysql连接池实现类
+package com.wykd.dbpool.pool;
+
+import java.sql.Connection;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class MysqlDBPool implements  DBPool {
+
+    Lock lock = new ReentrantLock();
+
+    Lock releaseLock = new ReentrantLock();
+
+
+    /**
+     * 最大连接数
+     */
+    private int maxSize = 10;
+
+    /**
+     * 活跃连接数
+     */
+    private AtomicInteger activeSize = new AtomicInteger(0);
+
+    /**
+     * 空闲连接集合
+     */
+    LinkedBlockingQueue<Connection> idleList;
+    /**
+     * 活跃连接集合
+     */
+    LinkedBlockingQueue<Connection> busyList;
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
+    }
+
+    /**
+     * 初始化
+     */
+    public void init() {
+        idleList = new LinkedBlockingQueue();
+        busyList = new LinkedBlockingQueue();
+    }
+
+    /**
+     * 销毁
+     */
+    public void destory() {
+    }
+
+    /**
+     * 获取连接
+     * @return
+     */
+    public Connection getConnection() {
+
+
+        try {
+            lock.lock();
+
+            System.out.println("1获取连接开始。。。。。。。。。。。。。");
+
+            System.out.println("1当前活跃连接数为：" + activeSize.get());
+            System.out.println("1空闲连接数：" + idleList.size());
+            System.out.println("1繁忙连接数：" + busyList.size());
+
+
+            Connection conn = null;
+
+            //idle有值，直接从idle转移到busy
+            conn = idleList.poll();
+            if (conn != null) {
+                busyList.offer(conn);
+                activeSize.incrementAndGet();
+
+                System.out.println("1idle有值，直接从idle转移到busy");
+                return conn;
+            }
+
+            //idle无值，且未达到最大连接数，则创建新的连接
+            if (activeSize.get() < maxSize) {
+                if (activeSize.incrementAndGet() <= maxSize) {
+                    conn = JDBCUtil.createConnection();
+                    busyList.offer(conn);
+
+                    System.out.println("1idle无值，且未达到最大连接数，则创建新的连接");
+                    return conn;
+                }
+            }
+
+            //已经达到最大，等待10秒
+            try {
+                conn = idleList.poll(10, TimeUnit.SECONDS);
+                if (conn == null) {
+                    throw new RuntimeException("1连接超时！");
+                } else {
+                    busyList.offer(conn);
+                    activeSize.incrementAndGet();
+
+                    System.out.println("1等待十秒内，获得连接！");
+
+                    return conn;
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return conn;
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }finally{
+            System.out.println("1获取连接结束。。。。。。。。。。。。。");
+            lock.unlock();
+        }
+    }
+
+    /**
+     * 释放连接，将连接 从busy转移到idle
+     */
+    public void releaseConn(Connection conn) {
+
+
+        try {
+            releaseLock.lock();
+
+            System.out.println("2释放连接开始。。。。。。。。。。。。。。。。。。");
+            System.out.println("2释放连接前，活跃连接数为:"+activeSize.get() +" ==="+ Thread.currentThread().getName());
+
+            busyList.remove(conn);
+            idleList.offer(conn);
+            activeSize.decrementAndGet();
+
+            System.out.println("2当前活跃连接数为："+activeSize.get() +" ==="+ Thread.currentThread().getName());
+            System.out.println("2空闲连接数："+idleList.size() +" ==="+ Thread.currentThread().getName());
+            System.out.println("2繁忙连接数："+busyList.size() +" ==="+ Thread.currentThread().getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            System.out.println("2释放连接结束。。。。。。。。。。。。。。。。。。");
+            releaseLock.unlock();
+        }
+    }
+}
+
+```
+
+```java
+//将mysqlDBPool类注入到spring容器中，同时设置最大连接数。
+package com.wykd.dbpool.config;
+
+import com.wykd.dbpool.pool.MysqlDBPool;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class DbConfig {
+    @Bean
+    public MysqlDBPool mysqlDBPool(){
+        MysqlDBPool mysqlDBPool = new MysqlDBPool();
+        mysqlDBPool.init();
+        mysqlDBPool.setMaxSize(10);
+        return mysqlDBPool;
+    }
+
+}
+```
+
+```java
+//controller类
+package com.wykd.dbpool.controller;
+
+import com.wykd.dbpool.pool.DBPool;
+import com.wykd.dbpool.pool.MysqlDBPool;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.concurrent.CountDownLatch;
+
+@RestController
+public class DbController {
+
+    //模拟并发20
+    private CountDownLatch countDownLatch = new CountDownLatch(20);
+
+    @Autowired
+    private MysqlDBPool mysqlDBPool;
+
+    @GetMapping("/insert")
+    public String insertUser(){
+
+        for (int i = 0; i < 20; i++) {
+                new Thread(()->{
+
+                    countDownLatch.countDown();
+                    try {
+                        countDownLatch.await();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Connection conn = mysqlDBPool.getConnection();
+                    Statement st = null;
+                    try {
+                        st = conn.createStatement();
+                        st.executeUpdate("insert into user(name ,age) values('wang',22)");
+
+                        Thread.sleep(2000);
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            st.close();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    mysqlDBPool.releaseConn(conn);
+
+                }).start();
+        }
+        return "{\"success\":\"true\"}";
+    }
+}
+
+```
+
+
+
 ## Druid连接池
+
+
+
+
+
