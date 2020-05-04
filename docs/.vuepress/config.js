@@ -98,6 +98,7 @@ module.exports = {
 				'go'
 			],'/java/':[
 				'java',
+				'jvm',
 				'thread',
 				'jdk8',
 				'io'
