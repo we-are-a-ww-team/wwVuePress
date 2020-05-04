@@ -6,7 +6,7 @@
 
 分页
 
-```
+```xml
 <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
@@ -24,7 +24,7 @@
         </dependency>
 ```
 
-```
+```java
 @Service
 public class UserService {
 
@@ -73,7 +73,7 @@ public class UserService {
 }
 ```
 
-```
+```java
 package com.wykd.oppo.user.model;
 
 import com.baomidou.mybatisplus.annotations.TableField;
@@ -175,7 +175,7 @@ public class UserModel implements Serializable {
 
 ```
 
-```
+```java
 /**
  * 功能：
  * Created by [Alex]
@@ -189,7 +189,7 @@ public interface UserMapper extends BaseMapper<UserModel> {
 
 ```
 
-```
+```java
 package com.wykd.oppo.user.controller;
 
 /**
@@ -274,7 +274,7 @@ public class UserController {
 
 ```
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
@@ -366,7 +366,9 @@ public class MybatisPlusConfig {
 }
 ```
 
-**code-generate**
+## **代码生成器**
+
+code-generate
 
 ```java
 package com.wykd.oppo;
@@ -544,7 +546,7 @@ public class MpGenerator {
 
 
 
-## Jdbc
+## JDBC
 
 ```java
 import java.sql.Connection;
@@ -576,7 +578,21 @@ public class DbUtil {
 
 
 
-## 手写连接池
+## HandWritten-DBPool
+
+> 要点：
+>
+> 1.创建2个队列，一个空闲连接队列，一个繁忙连接队列
+>
+> 2.当获取连接时：
+>
+> ​		2.1 当空闲连接队列为空，且**活跃连接数**<**最大连接数**，则创建新连接。
+>
+> ​		2.2 当空闲连接不为空，则直接将连接从**空闲连接队列**转移到**繁忙连接队列**。
+>
+> ​		2.3 若以上2个条件均不满足，则等待连接释放，即空闲连接队列有值时，则从中获取到连接。
+>
+> 结论：数据库最大连接数始终不超过10个。业务操作执行完后，连接放入空闲队列。
 
 ```java
 //JDBC连接
@@ -655,7 +671,6 @@ public class MysqlDBPool implements  DBPool {
     Lock lock = new ReentrantLock();
 
     Lock releaseLock = new ReentrantLock();
-
 
     /**
      * 最大连接数
@@ -873,6 +888,215 @@ public class DbController {
         return "{\"success\":\"true\"}";
     }
 }
+
+```
+
+```
+输出结果：
+
+2020-05-03 20:17:10.115  INFO 40572 --- [nio-8091-exec-1] o.a.c.c.C.[.[localhost].[/dbpool]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2020-05-03 20:17:10.116  INFO 40572 --- [nio-8091-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2020-05-03 20:17:10.120  INFO 40572 --- [nio-8091-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 4 ms
+1当前活跃连接数为：0
+1空闲连接数：0
+1繁忙连接数：0
+创建新连接
+Sun May 03 20:17:10 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：1
+1空闲连接数：0
+1繁忙连接数：1
+创建新连接
+Sun May 03 20:17:11 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：2
+1空闲连接数：0
+1繁忙连接数：2
+创建新连接
+Sun May 03 20:17:11 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：3
+1空闲连接数：0
+1繁忙连接数：3
+创建新连接
+Sun May 03 20:17:11 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：4
+1空闲连接数：0
+1繁忙连接数：4
+创建新连接
+Sun May 03 20:17:11 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：5
+1空闲连接数：0
+1繁忙连接数：5
+创建新连接
+Sun May 03 20:17:11 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：6
+1空闲连接数：0
+1繁忙连接数：6
+创建新连接
+Sun May 03 20:17:11 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：7
+1空闲连接数：0
+1繁忙连接数：7
+创建新连接
+Sun May 03 20:17:11 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：8
+1空闲连接数：0
+1繁忙连接数：8
+创建新连接
+Sun May 03 20:17:12 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：9
+1空闲连接数：0
+1繁忙连接数：9
+创建新连接
+Sun May 03 20:17:12 CST 2020 WARN: Establishing SSL connection without server's identity verification is not recommended. According to MySQL 5.5.45+, 5.6.26+ and 5.7.6+ requirements SSL connection must be established by default if explicit option isn't set. For compliance with existing applications not using SSL the verifyServerCertificate property is set to 'false'. You need either to explicitly disable SSL by setting useSSL=false, or set useSSL=true and provide truststore for server certificate verification.
+idle无值，且未达到最大连接数，则创建新的连接
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-31
+释放连接前，活跃连接数为:10 ===Thread-31
+2当前活跃连接数为：9 ===Thread-31
+2空闲连接数：0 ===Thread-31
+等待十秒内，获得连接！
+2繁忙连接数：10 ===Thread-31
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-13
+释放连接前，活跃连接数为:10 ===Thread-13
+2当前活跃连接数为：9 ===Thread-13
+2空闲连接数：0 ===Thread-13
+2繁忙连接数：10 ===Thread-13
+等待十秒内，获得连接！
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-12
+释放连接前，活跃连接数为:10 ===Thread-12
+2当前活跃连接数为：9 ===Thread-12
+2空闲连接数：1 ===Thread-12
+2繁忙连接数：9 ===Thread-12
+等待十秒内，获得连接！
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-14
+释放连接前，活跃连接数为:10 ===Thread-14
+2当前活跃连接数为：9 ===Thread-14
+2空闲连接数：1 ===Thread-14
+2繁忙连接数：9 ===Thread-14
+等待十秒内，获得连接！
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-15
+释放连接前，活跃连接数为:10 ===Thread-15
+2当前活跃连接数为：9 ===Thread-15
+2空闲连接数：1 ===Thread-15
+2繁忙连接数：10 ===Thread-15
+等待十秒内，获得连接！
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-16
+释放连接前，活跃连接数为:10 ===Thread-16
+2当前活跃连接数为：9 ===Thread-16
+2空闲连接数：1 ===Thread-16
+2繁忙连接数：9 ===Thread-16
+等待十秒内，获得连接！
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-17
+释放连接前，活跃连接数为:10 ===Thread-17
+2当前活跃连接数为：9 ===Thread-17
+2空闲连接数：1 ===Thread-17
+2繁忙连接数：9 ===Thread-17
+等待十秒内，获得连接！
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-18
+释放连接前，活跃连接数为:10 ===Thread-18
+2当前活跃连接数为：9 ===Thread-18
+等待十秒内，获得连接！
+2空闲连接数：0 ===Thread-18
+2繁忙连接数：10 ===Thread-18
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-19
+释放连接前，活跃连接数为:10 ===Thread-19
+2当前活跃连接数为：9 ===Thread-19
+2空闲连接数：1 ===Thread-19
+2繁忙连接数：10 ===Thread-19
+等待十秒内，获得连接！
+1当前活跃连接数为：10
+1空闲连接数：0
+1繁忙连接数：10
+释放连接开始！========== ===Thread-20
+释放连接前，活跃连接数为:10 ===Thread-20
+2当前活跃连接数为：9 ===Thread-20
+2空闲连接数：0 ===Thread-20
+2繁忙连接数：10 ===Thread-20
+等待十秒内，获得连接！
+释放连接开始！========== ===Thread-21
+释放连接前，活跃连接数为:10 ===Thread-21
+2当前活跃连接数为：9 ===Thread-21
+2空闲连接数：1 ===Thread-21
+2繁忙连接数：9 ===Thread-21
+释放连接开始！========== ===Thread-22
+释放连接前，活跃连接数为:9 ===Thread-22
+2当前活跃连接数为：8 ===Thread-22
+2空闲连接数：2 ===Thread-22
+2繁忙连接数：8 ===Thread-22
+释放连接开始！========== ===Thread-23
+释放连接前，活跃连接数为:8 ===Thread-23
+2当前活跃连接数为：7 ===Thread-23
+2空闲连接数：3 ===Thread-23
+2繁忙连接数：7 ===Thread-23
+释放连接开始！========== ===Thread-24
+释放连接前，活跃连接数为:7 ===Thread-24
+2当前活跃连接数为：6 ===Thread-24
+2空闲连接数：4 ===Thread-24
+2繁忙连接数：6 ===Thread-24
+释放连接开始！========== ===Thread-25
+释放连接前，活跃连接数为:6 ===Thread-25
+2当前活跃连接数为：5 ===Thread-25
+2空闲连接数：5 ===Thread-25
+2繁忙连接数：5 ===Thread-25
+释放连接开始！========== ===Thread-26
+释放连接前，活跃连接数为:5 ===Thread-26
+2当前活跃连接数为：4 ===Thread-26
+2空闲连接数：6 ===Thread-26
+2繁忙连接数：4 ===Thread-26
+释放连接开始！========== ===Thread-27
+释放连接前，活跃连接数为:4 ===Thread-27
+2当前活跃连接数为：3 ===Thread-27
+2空闲连接数：7 ===Thread-27
+2繁忙连接数：3 ===Thread-27
+释放连接开始！========== ===Thread-28
+释放连接前，活跃连接数为:3 ===Thread-28
+2当前活跃连接数为：2 ===Thread-28
+2空闲连接数：8 ===Thread-28
+2繁忙连接数：2 ===Thread-28
+释放连接开始！========== ===Thread-29
+释放连接前，活跃连接数为:2 ===Thread-29
+2当前活跃连接数为：1 ===Thread-29
+2空闲连接数：9 ===Thread-29
+2繁忙连接数：1 ===Thread-29
+释放连接开始！========== ===Thread-30
+释放连接前，活跃连接数为:1 ===Thread-30
+2当前活跃连接数为：0 ===Thread-30
+2空闲连接数：10 ===Thread-30
+2繁忙连接数：0 ===Thread-30
 
 ```
 
