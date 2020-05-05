@@ -62,24 +62,6 @@ public boolean equals(Object anObject) {
 }
 ```
 
-## JVM内存模型
-
-1. 常量池：存放**字符串常量**和**基本类型常量**（public static final）。
-2. 栈（stack）：主要保存**基本数据类型**（char、byte、short、int、long、float、double、boolean）
-3. 堆（heap）：用于存储对象（new的对象）
-
-| 属性 | 描述                                                        |
-| ---- | ----------------------------------------------------------- |
-| -Xms | 初始堆内存                                                  |
-| -Xmx | 最大堆内存                                                  |
-| -Xss | 每个线程的堆栈大小，根据jvm规范，一个线程默认最大栈大小为1M |
-
-
-
-## IO流
-
-
-
 
 
 ## LindedList双向链表的使用

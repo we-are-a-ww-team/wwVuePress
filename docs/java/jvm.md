@@ -1,8 +1,18 @@
 # JVM
 
-> 线程独有内存：栈内存
+> JDK：Java Development Kit（ Java开发软件包）
 >
-> 共享内存：堆内存，方法区
+> JRE：Java Runtime Envirmoment （Java运行环境）
+>
+> JVM：Java Virturn Machine （Java虚拟机）
+
+## JVM内存模型
+
+![img](./jvm.assets/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAxNy85LzQvZGQzYjE1YjNkODgyNmZhZWFlMjA2Mzk3NmZiOTkyMTM_aW1hZ2VWaWV3Mi8wL3cvMTI4MC9oLzk2MC9mb3JtYXQvd2VicC9pZ25vcmUtZXJyb3IvMQ.jpg)
+
+- 方法区：线程共享，**运行时常量池**，存放**字符串常量**和**基本类型常量**（public static final）。
+- 堆（heap）：线程共享，用于存储**new的对象，数组**
+- 栈（stack）：线程独有，主要保存**基本数据类型变量**（char、byte、short、int、long、float、double、boolean）
 
 ## 栈内存
 
@@ -12,9 +22,15 @@
 >
 > 2.虚拟机栈：每一个方法，会启用一个栈帧。每个栈帧包括：**局部变量表，操作数栈**，动态连接等
 >
+> ​		2.1 注：**基本数据类型**（char、byte、short、int、long、float、double、boolean）就是存放在局部变量表中。
+>
 > 3.本地方法栈：native方法，调用系统的C语言方法，可通过linux命令查看，如：man 2 select
 
-出栈入栈示例：
+栈帧示意图：
+
+![201809122103015](./jvm.assets/201809122103015.jpg)
+
+### 出栈入栈示例
 
 ```java
 package com.wykd.jvm;
@@ -115,10 +131,78 @@ SourceFile: "JVMTest.java"
 
 ```
 
-导致异常情况：
+### 内存异常分析
 
-StackOverFlowException：通常由于递归导致，嵌套执行的层数超出jvm的默认层数，导致溢出。
+> **StackOverflowError**：如果线程请求的栈深度大于虚拟机所允许的深度，将抛出StackOverflowError
 
-OutOfMemoryException：线程总共占用的内存过大，导致内存溢出。一个线程默认占用1M内存；解决办法，将Xss改小，如：改为128K，Xss该小后，还能增加并发线程数的能力。
+> **OutOfMemoryError**：多线程环境下，虚拟机在扩展栈时，无法申请到足够的内存空间。
+>
+> 解决办法：减少单个线程占用的的内存容量；一个线程默认占用1M内存；将Xss改小，除了能解决异常，还能增加并发线程数的能力。
+
+#### StackOverflowError代码演示：
+
+```java
+package com.wykd.jvm;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class StackTest {
+
+    AtomicInteger count = new AtomicInteger(0);
+    public static void main(String[] args) {
+        try {
+            new StackTest().recursion();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void recursion() throws RuntimeException{
+        System.out.println("执行次数为"+count.incrementAndGet());
+        recursion();
+    }
+}
+
+```
+
+```
+此处省略6500行：
+...
+执行次数为6505
+执行次数为6506
+执行次数为6507
+执行次数为6508
+Exception in thread "main" java.lang.StackOverflowError
+	at sun.nio.cs.UTF_8$Encoder.encodeLoop(UTF_8.java:691)
+	at java.nio.charset.CharsetEncoder.encode(CharsetEncoder.java:579)
+	at sun.nio.cs.StreamEncoder.implWrite(StreamEncoder.java:271)
+	at sun.nio.cs.StreamEncoder.write(StreamEncoder.java:125)
+	at java.io.OutputStreamWriter.write(OutputStreamWriter.java:207)
+```
+
+
+
+| 属性 | 描述                                                         |
+| ---- | ------------------------------------------------------------ |
+| -Xss | 每个线程的栈内存大小，根据jvm规范，一个线程默认最大栈大小为1M |
 
 ## 堆内存
+
+> 堆内存包含2个方面：
+>
+> 1.新生代，包括：Eden空间，From survivor空间 ，To survivor空间.  
+>
+> ​		1.1 Eden空间不够，会触发MinorGC，对象移入交换区（From，To）.
+>
+> ​		1.2 MinorGC后，对象在交换区的年龄加1，当超过15次后，晋升到老年代。
+>
+> 2.老年代
+>
+> ​		2.1 老年代内存空间不够，会触发FullGC，会导致jvm停摆，应尽量避免。
+
+![1588647222686](./jvm.assets/20181123094300106.png)
+
+| 属性 | 描述       |
+| ---- | ---------- |
+| -Xms | 初始堆内存 |
+| -Xmx | 最大堆内存 |
