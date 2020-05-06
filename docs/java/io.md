@@ -429,12 +429,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NioServer {
 
@@ -445,6 +444,8 @@ public class NioServer {
     private Selector selector;
 
     private ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+
+    private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public static void main(String[] args) {
         new NioServer(8080).listen();
@@ -490,7 +491,8 @@ public class NioServer {
             //轮训
             while (true) {
 
-                int i = selector.select();
+                int i = selector.select(2000);
+                System.out.println(i);
                 if(i==0){
                     System.out.println("监听数为0，进入下次循环！");
                     continue;
@@ -538,16 +540,26 @@ public class NioServer {
             int len = socketChannel.read(byteBuffer);
 
             if(len>0){
+
                 byteBuffer.flip();  //将Buffer从写模式切换到读模式
                 String content = new String(byteBuffer.array(),0,len);
-
-                System.out.println("客户端信息："+content);
-
                 byteBuffer.clear();
 
-                //修改客户端注册的状态为：Writable
-                key = socketChannel.register(selector,SelectionKey.OP_WRITE);
-                key.attach(content);
+				//线程池执行业务
+                executorService.submit(()->{
+                    System.out.println("客户端信息："+content);
+                    //修改客户端注册的状态为：Writable
+                    SelectionKey key2 = null;
+                    try {
+                        Thread.sleep(5000);
+                        key2 = socketChannel.register(selector, SelectionKey.OP_WRITE);
+                        key2.attach(content);
+                    } catch (ClosedChannelException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+//
+//                socketChannel.write(ByteBuffer.wrap(("服务端反馈=====>"+content).getBytes("utf-8") ));
             }
         }
         else if(key.isWritable()){
@@ -630,94 +642,20 @@ public class NioClient {
 ```
 
 ```
-分别启动服务端，以及客户端，输出结果为：(set集合中，最多只有3个值)
+分别启动服务端，以及客户端，输出结果为：
 
-监听数：1
-========>[{"acceptable":true,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":false}]
-keys长度========>1
-监听数：2
-========>[{"acceptable":true,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>2
-客户端信息：hello world 2
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
-keys长度========>3
-客户端信息：hello world 19
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 1
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 3
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
-keys长度========>3
-客户端信息：hello world 4
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 5
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 18
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 6
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
-keys长度========>3
-客户端信息：hello world 7
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 17
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 9
-监听数：3
-========>[{"acceptable":true,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 16
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
-keys长度========>3
-客户端信息：hello world 10
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 15
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 8
-监听数：3
-========>[{"acceptable":true,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
-keys长度========>3
-客户端信息：hello world 14
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
-keys长度========>3
-客户端信息：hello world 11
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 13
-监听数：3
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>3
-客户端信息：hello world 12
-监听数：2
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>2
-客户端信息：hello world 0
-监听数：1
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true}]
-keys长度========>1
+0
+监听数为0，进入下次循环！
+监听数：20
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>20
+20
+监听数：15
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
+keys长度========>15
+0
+监听数为0，进入下次循环！
+
 ```
 
 ## 文件复制（9种实现方式）
