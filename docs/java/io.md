@@ -421,7 +421,7 @@ hello world 02
 
 ```java
 //服务端
-package com.wykd.nio;
+package com.wykd.io.nio;
 
 import com.alibaba.fastjson.JSON;
 
@@ -466,12 +466,12 @@ public class NioServer {
             //2.绑定端口
             SocketAddress inetSocketAddress = new InetSocketAddress(port) ;
             serverSocketChannel.bind(inetSocketAddress);
-            serverSocketChannel.configureBlocking(false);
+            serverSocketChannel.configureBlocking(false); //将accept设置为非阻塞
 
             //3.开启一个选择器
             selector = Selector.open();
 
-            //4.将服务端注册到选择器, 并设置为接收模式
+            //4.当有客户端连接上来，就将客户端注册到selector上，并默认状态为Accepted
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
         } catch (IOException e) {
@@ -487,12 +487,19 @@ public class NioServer {
     public void listen(){
 
         try {
+            //轮训
             while (true) {
 
-                selector.select();
+                int i = selector.select();
+                if(i==0){
+                    System.out.println("监听数为0，进入下次循环！");
+                    continue;
+                }else{
+                    System.out.println("监听数："+i);
+                }
                 Set<SelectionKey> keys =  selector.selectedKeys();
-
                 System.out.println("========>"+JSON.toJSONString(keys));
+                System.out.println("keys长度========>"+keys.size());
 
                 Iterator<SelectionKey> keysIterator = keys.iterator();
                 //循环处理 ，每个key代表一种状态
@@ -500,6 +507,8 @@ public class NioServer {
                     SelectionKey key = keysIterator.next();
                     process(key);
                     keysIterator.remove();
+
+//                    System.out.println("*****************"+key.isAcceptable()+key.isReadable()+key.isWritable());
                 }
             }
         }catch(Exception e){
@@ -514,65 +523,91 @@ public class NioServer {
     private void process(SelectionKey key) throws IOException {
 
         if(key.isAcceptable()){
-            //可接收的状态，获取的是服务端Channel
+            //可接收的状态，key.channel获取的是服务端Channel
             ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
             SocketChannel socketChannel = serverSocketChannel.accept();
-            socketChannel.configureBlocking(false);
+            socketChannel.configureBlocking(false);  //将读取方法设置为非阻塞
 
-            //数据准备就绪，将客户端注册到选择器，并设置为可读
-            key = socketChannel.register(selector,SelectionKey.OP_READ);
+            //数据准备就绪，修改客户端注册的状态为：Readable，开始监听并读取客户端的信息。
+            socketChannel.register(selector,SelectionKey.OP_READ);
 
         }else if(key.isReadable()){
-            //可读的状态，获取的是客户端Channel
+            //可读的状态，key.channel获取的是客户端Channel
             SocketChannel socketChannel = (SocketChannel) key.channel();
+            //从byteBuffer中读取
             int len = socketChannel.read(byteBuffer);
 
             if(len>0){
-                byteBuffer.flip();
+                byteBuffer.flip();  //将Buffer从写模式切换到读模式
                 String content = new String(byteBuffer.array(),0,len);
 
-                //将客户端注册为可写
+                System.out.println("客户端信息："+content);
+
+                byteBuffer.clear();
+
+                //修改客户端注册的状态为：Writable
                 key = socketChannel.register(selector,SelectionKey.OP_WRITE);
                 key.attach(content);
-
-                System.out.println(content);
             }
-        }else if(key.isWritable()){
-            //可写的状态，获取的是客户端Channel
+        }
+        else if(key.isWritable()){
+            //可写的状态，key.channel获取的是客户端Channel
             SocketChannel socketChannel = (SocketChannel) key.channel();
             String content = (String) key.attachment();
-            socketChannel.write(ByteBuffer.wrap(content.getBytes()));
+            //写入buffer
+            socketChannel.write(ByteBuffer.wrap(("服务端反馈"+content).getBytes()));
             socketChannel.close();
         }
     }
 }
 
+
 ```
 
 ```java
-//客户端
-package com.wykd.nio;
+package com.wykd.io.nio;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NioClient {
 
+   static CountDownLatch countDownLatch = new CountDownLatch(20);
+
     public static void main(String[] args) {
-        startClient();
+
+        for (int i = 0; i < 20; i++) {
+            final int num = i;
+            new Thread(()->{
+                countDownLatch.countDown();
+                try {
+                    countDownLatch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                new NioClient().startClient(num);
+            }).start();
+
+
+        }
     }
 
-    public static void startClient() {
+    public  void startClient(int num) {
+        System.out.println("num"+num);
         try (
                 Socket socket = new Socket("localhost", 8080);
                 OutputStream out = socket.getOutputStream();
                 InputStream in = socket.getInputStream();
         ) {
 
-            System.out.println("向服务端发送消息！");
-            out.write("hello world".getBytes());
+            System.out.println("向服务端发送消息！"+"hello world "+num);
+            out.write(("hello world "+num).getBytes());
             out.flush();
 
             socket.shutdownOutput();  //该句话非常关键，不关闭输出流的话，但不会关闭socket连接，服务端会一直阻塞在读取方法。
@@ -591,15 +626,98 @@ public class NioClient {
     }
 }
 
+
 ```
 
 ```
-分别启动服务端，以及客户端，输出结果为：
+分别启动服务端，以及客户端，输出结果为：(set集合中，最多只有3个值)
 
+监听数：1
 ========>[{"acceptable":true,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":false}]
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false}]
-hello world
+keys长度========>1
+监听数：2
+========>[{"acceptable":true,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>2
+客户端信息：hello world 2
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
+keys长度========>3
+客户端信息：hello world 19
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 1
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 3
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
+keys长度========>3
+客户端信息：hello world 4
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 5
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 18
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 6
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
+keys长度========>3
+客户端信息：hello world 7
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 17
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 9
+监听数：3
+========>[{"acceptable":true,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 16
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
+keys长度========>3
+客户端信息：hello world 10
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 15
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 8
+监听数：3
+========>[{"acceptable":true,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
+keys长度========>3
+客户端信息：hello world 14
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
+keys长度========>3
+客户端信息：hello world 11
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 13
+监听数：3
+========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":true,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>3
+客户端信息：hello world 12
+监听数：2
+========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
+keys长度========>2
+客户端信息：hello world 0
+监听数：1
 ========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true}]
+keys长度========>1
 ```
 
 ## 文件复制（9种实现方式）
