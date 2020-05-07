@@ -101,7 +101,8 @@ module.exports = {
 				'jvm',
 				'thread',
 				'jdk8',
-				'io'
+				'io',
+				'tomcat'
 			],'/database/':[
 				'mysql',
 				'oracle',

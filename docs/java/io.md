@@ -914,6 +914,10 @@ copy09耗时===>76===>FileChannel零拷贝
 
 参考文章：https://www.cnblogs.com/snailclimb/p/Buffer.html
 
+图解NIO三大组件：Selector，Channel，Buffer
+
+![1588863745905](./io.assets/1588863745905.png)
+
 ### Buffer
 
 > 1.当向buffer写入数据时，buffer会记录下写了多少数据。一旦要读取数据，需要通过flip()方法将Buffer从写模式切换到读模式。在读模式下，可以读取之前写入到buffer的所有数据。
@@ -969,7 +973,14 @@ public class TestBuffer {
 
         try {
             FileInputStream fis = new FileInputStream("d://abc.txt");
+            
+            //指定大小的缓冲区
             ByteBuffer buffer = ByteBuffer.allocate(1024);
+            
+            //包装了一个字节数组的缓冲区
+            //byte[] tbytes = new byte[1024];
+            //ByteBuffer buffer = ByteBuffer.warp(tbytes)
+            
             FileChannel fc = fis.getChannel();
 
             //1.从channel读取并写入buffer
@@ -1034,6 +1045,10 @@ buffer.clear()===>	position:0 	 limit:1024 	capacity1024
 **写模式，读模式下的buffer示意图：**
 
 ![不同模式下position和limit的含义](./io.assets/16358e573449c84d.png)
+
+
+
+
 
 ### Channel
 
