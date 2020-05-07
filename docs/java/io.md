@@ -643,18 +643,47 @@ public class NioClient {
 
 ```
 分别启动服务端，以及客户端，输出结果为：
+疑问：acceptable为5次，writable为5次，但执行了异步多线程的readable为7次？？
 
-0
-监听数为0，进入下次循环！
-监听数：20
-========>[{"acceptable":false,"connectable":false,"readable":true,"selector":{"open":true},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false},{"acceptable":false,"connectable":false,"readable":true,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":false}]
-keys长度========>20
-20
-监听数：15
-========>[{"acceptable":false,"connectable":false,"readable":false,"selector":{"open":true},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true},{"acceptable":false,"connectable":false,"readable":false,"selector":{"$ref":"$[0].selector"},"valid":true,"writable":true}]
-keys长度========>15
-0
-监听数为0，进入下次循环！
+监听数：1
+========>[{"acceptable":true,}]
+keys长度========>1
+
+监听数：2
+========>[{"acceptable":true,},{"readable":true,}]
+keys长度========>2
+len为：13
+客户端信息：hello world 0
+
+监听数：3
+========>[{"readable":true,},{"acceptable":true,},{"readable":true,}]
+keys长度========>3
+len为：13
+客户端信息：hello world 4
+len为：-1
+
+监听数：4
+========>[{"readable":true,},{"writable":true},{"acceptable":true,},{"writable":true}]
+keys长度========>4
+len为：13
+客户端信息：hello world 2
+
+监听数：3
+========>[{"writable":true},{"acceptable":true,},{"readable":true,}]
+keys长度========>3
+len为：13
+客户端信息：hello world 3
+
+监听数：2
+========>[{"readable":true,},{"readable":true,}]
+keys长度========>2
+len为：13
+客户端信息：hello world 1
+len为：-1
+
+监听数：2
+========>[{"writable":true},{"writable":true}]
+keys长度========>2！
 
 ```
 
@@ -883,10 +912,138 @@ copy09耗时===>76===>FileChannel零拷贝
 
 ## NIO流概念
 
-> Channel，管道
->
-> Buffer，缓冲区
->
-> Selector，选择器
+参考文章：https://www.cnblogs.com/snailclimb/p/Buffer.html
 
-## 
+### Buffer
+
+> 1.当向buffer写入数据时，buffer会记录下写了多少数据。一旦要读取数据，需要通过flip()方法将Buffer从写模式切换到读模式。在读模式下，可以读取之前写入到buffer的所有数据。
+>
+> 2.一旦读完了所有的数据，就需要清空缓冲区，让它可以再次被写入。有两种方式能清空缓冲区：调用clear()或compact()方法。
+>
+> - flip方法将Buffer从写模式切换到读模式。调用flip()方法会将position设回0，并将limit设置成之前position的值。
+
+
+
+
+**写入buffer：**
+
+```java
+// 从Channel读取，并写入Buffer
+int bytesRead = inChannel.read(buf);  
+
+//通过put方法写入Buffer
+buf.put("127");
+```
+
+
+**读取buffer：**
+
+```java
+// 从Buffer读取，写入Channel
+int bytesWritten = inChannel.write(buf);  
+
+//使用get()方法从Buffer中读取数据
+byte aByte = buf.get();
+```
+
+**position，limit，capacity变化代码演示：**
+
+```java
+package com.wykd.nio;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+
+/**
+ * 功能：
+ * Created by [Alex]
+ * 2020/5/7 14:10
+ */
+public class TestBuffer {
+
+
+    public static void main(String[] args) {
+
+        try {
+            FileInputStream fis = new FileInputStream("d://abc.txt");
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            FileChannel fc = fis.getChannel();
+
+            //1.从channel读取并写入buffer
+            int len = fc.read(buffer);
+            printBufferInfo("fc.read(buffer)===>",buffer);
+
+            //2.从写模式切换到读取模式，position设回0，并将limit设置成之前position的值。
+            buffer.flip();
+            printBufferInfo("buffer.flip()===>",buffer);
+
+            //3.从buffer中读取字节
+            if (len > 0) {
+
+                byte[] bytes = new byte[len];
+                int count = 0;
+                while (buffer.remaining() >0){
+                    bytes[count] = buffer.get();
+                    count++;
+                }
+//                System.out.println(new String(bytes));
+                printBufferInfo("buffer.get()===>",buffer);
+            }
+
+            //4.清理buffer，指针归位，回到初始状态
+            buffer.clear();
+            printBufferInfo("buffer.clear()===>",buffer);
+
+            fc.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    /**
+     * 打印
+     * @param type
+     * @param buffer
+     */
+    private static void printBufferInfo(String type ,ByteBuffer buffer) {
+        System.out.println(type + "position:" + buffer.position() + " limit:" + buffer.limit() + " capacity" + buffer.capacity());
+    }
+
+
+}
+
+```
+
+```
+打印结果：
+
+fc.read(buffer)===>	position:90  limit:1024 	capacity1024
+buffer.flip()===>	position:0 	 limit:90 		capacity1024
+buffer.get()===>	position:90  limit:90 		capacity1024
+buffer.clear()===>	position:0 	 limit:1024 	capacity1024
+```
+
+**写模式，读模式下的buffer示意图：**
+
+![不同模式下position和limit的含义](./io.assets/16358e573449c84d.png)
+
+### Channel
+
+> Channel 必须要配合 Buffer一起使用
+
+![数据读取和写入操作图示](./io.assets/1635844948c99fc9.png)
+
+### Selector
+
+> Selector 会不断地轮询注册在其上的 Channel，如果某个 Channel 上面发生了读或者写事件，这个 Channel 就处于就绪状态，会被 Selector 轮询出来，然后通过 SelectionKey 可以获取就绪 Channel 的集合，进行后续的 I/O 操作。
+>
+
+![Selector（选择器）](./io.assets/16363f5338f36c54.png)
