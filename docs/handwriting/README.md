@@ -22,6 +22,8 @@
 
 ## 手写tomcat
 
+[手写tomcat](http://www.kingknowtech.com/docs/java/tomcat.html#handwritten-tomcat)
+
 ## 手写RedisClient
 
-[手写RedisClient](http://www.kingknowtech.com/docs/middleware/redis.html#handwritten-redisclient)
+[手写RedisClient](/middleware/redis.html#handwritten-redisclient)
