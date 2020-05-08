@@ -17,7 +17,8 @@ module.exports = {
           { text: 'Home', link: '/' },
 		  { text: '前端技术', 
 			items: [
-              { text: 'Vue', link: '/vue/' }
+              { text: 'Vue', link: '/vue/' },
+			  { text: 'Jquery', link: '/jquery/' }
             ]
 		  },
           {
@@ -38,6 +39,7 @@ module.exports = {
           },
 		  { text: '功能实现',  items: [
 			  { text: '手写系列', link: '/handwriting/' },
+			  { text: '源码系列', link: '/sourceCode/' },  
 			  { text: '接口加密解密', link: '/encrypt/' },
 			  { text: '单点登录', link: '/sso/' },
 			  { text: '动态数据源', link: '/dynamicDBSource/' },
@@ -60,6 +62,9 @@ module.exports = {
 		sidebarDepth: 2,
 		sidebar: {
 			'/vue/':[
+				''
+			],
+			'/jquery/':[
 				''
 			],
 			'/docker/':[
@@ -122,6 +127,8 @@ module.exports = {
 				'distributedTransaction'
 			],'/server2client/':[
 				'server2client'
+			],'/sourceCode/':[
+				''
 			]
 		}
     }

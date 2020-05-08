@@ -435,7 +435,7 @@ public class HelloServlet extends WHttpServlet{
 发送请求：
 
 ```
-http://localhost:8080/w_spring_web/helloController/nihao?id=123&name=wang
+http://localhost:8080/helloServlet
 
 返回结果：
 
@@ -445,3 +445,329 @@ hello
 
 
 ### Netty版本
+
+引入netty的包
+
+```xml
+ <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.49.Final</version>
+        </dependency>
+```
+
+WTomcat启动类：
+
+```java
+package com.wykd.netty.tomcat;
+
+import com.wykd.netty.xml.ParseServletXML;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
+
+import java.util.Map;
+
+public class WTomcat {
+
+
+    public static void main(String[] args) {
+
+    	new WTomcat().start(8080);
+    }
+
+    private void start(int port) {
+
+		EventLoopGroup bossGroup = new NioEventLoopGroup();
+		EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try {
+
+
+            ServerBootstrap serverChannel = new ServerBootstrap();
+            serverChannel.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        protected void initChannel(SocketChannel clientChannel) throws Exception {
+
+                            clientChannel.pipeline().addLast(new HttpResponseEncoder());
+
+                            clientChannel.pipeline().addLast(new HttpRequestDecoder());
+
+                            clientChannel.pipeline().addLast(new WTomcatHandler());
+                        }
+                    })
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+
+
+            ChannelFuture f = serverChannel.bind(port).sync();
+            System.out.println("tomcat 已启动");
+            f.channel().closeFuture().sync();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+			bossGroup.shutdownGracefully();
+			workerGroup.shutdownGracefully();
+        }
+
+    }
+
+
+    class WTomcatHandler extends ChannelInboundHandlerAdapter{
+
+		@Override
+		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
+			if(msg instanceof HttpRequest){
+				HttpRequest req = (HttpRequest) msg;
+
+				WRequest request = new WRequest(ctx,req);
+
+				WResponse response = new WResponse(ctx,req);
+				dispatch(request,response);
+			}
+		}
+
+
+		private  void dispatch(WRequest request, WResponse response) {
+
+			String methodName = request.getMethod();
+			String url = request.getUrl();
+
+			System.out.println("methodName====>" + methodName);
+			System.out.println("url====>" + url);
+
+
+			//找到对应的servelt，然后执行对应的get,post方法
+//		new HelloServlet().service(request, response);
+
+			Map<String, String> servletMap = new ParseServletXML().getServletURLMap();
+			String className = servletMap.get(url);
+
+			if (className != null && !className.equals("")) {
+				try {
+					Class<WHttpServlet> clazz = (Class<WHttpServlet>) Class.forName(className);
+					try {
+						WHttpServlet whttpServlet = (WHttpServlet) clazz.newInstance();
+						whttpServlet.service(request, response);
+
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+}
+
+```
+
+WRequest类：
+
+```java
+package com.wykd.netty.tomcat;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+public class WRequest {
+
+    private String url;
+    private String method;
+    private String hostName;
+
+    private ChannelHandlerContext ctx;
+    private HttpRequest req;
+
+    private Map<String, List<String>> parameters;
+
+    public WRequest() {
+    }
+
+
+    public WRequest(ChannelHandlerContext ctx, HttpRequest req) {
+        this.req =req;
+        this.ctx = ctx;
+    }
+
+
+    public String getHostName() {
+        return hostName;
+    }
+
+
+    public String getUrl() {
+        return req.uri();
+    }
+
+
+    public String getMethod() {
+        return req.getMethod().name();
+    }
+
+    public Map<String, List<String>> getParameters() {
+        QueryStringDecoder decoder = new QueryStringDecoder(req.uri());
+        return decoder.parameters();
+    }
+
+
+}
+
+```
+
+WResponse类：
+
+```java
+package com.wykd.netty.tomcat;
+
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.*;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+public class WResponse {
+
+	private ChannelHandlerContext ctx;
+	private HttpRequest req;
+
+	public WResponse() {
+	}
+	
+    public WResponse(ChannelHandlerContext ctx, HttpRequest req) {
+		this.ctx = ctx;
+		this.req = req;
+    }
+
+
+    public void write(String content) {
+		
+		try{
+
+			if(content == null || content.length() ==0){
+				return ;
+			}
+
+			FullHttpResponse response = new DefaultFullHttpResponse(
+					HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
+					Unpooled.wrappedBuffer(content.getBytes("UTF-8"))
+			);
+
+			response.headers().set("Content-Type","text/html");
+			ctx.write(response);
+
+		}catch (Exception e){
+			e.printStackTrace();
+		}finally {
+			ctx.flush();
+			ctx.close();
+		}
+	}
+	
+	
+}
+
+```
+
+WHttpServlet类，内容无变化
+
+```java
+package com.wykd.netty.tomcat;
+
+public abstract class WHttpServlet {
+
+	public abstract void doGet(WRequest request , WResponse response) ;
+
+	public abstract void doPost(WRequest request , WResponse response) ;
+	
+	public void service(WRequest request , WResponse response) {
+		if(request.getMethod().equalsIgnoreCase("GET")) {
+			doGet(request, response);
+		}else if(request.getMethod().equalsIgnoreCase("POST")) {
+			doPost(request, response);
+		}
+	}
+	
+}
+
+```
+
+web.xml增加以下内容：
+
+```xml
+<servlet>
+		<servlet-name>userServlet</servlet-name>
+		<servlet-class>com.wykd.netty.servlet.UserServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>userServlet</servlet-name>
+		<url-pattern>/userServlet</url-pattern>
+	</servlet-mapping>
+```
+
+UserServlet
+
+```java
+package com.wykd.netty.servlet;
+
+import com.wykd.netty.tomcat.WHttpServlet;
+import com.wykd.netty.tomcat.WRequest;
+import com.wykd.netty.tomcat.WResponse;
+
+public class UserServlet extends WHttpServlet {
+
+	@Override
+	public void doGet(WRequest request, WResponse response) {
+		response.write("user");
+	}
+
+	@Override
+	public void doPost(WRequest request, WResponse response) {
+		response.write("user");
+	}
+
+	
+}
+
+```
+
+发送请求：
+
+```
+http://localhost:8080/helloServlet
+
+返回结果：
+
+user
+```
+
+
+
+## Tomcat源码项目构建
+
+参考1：https://www.cnblogs.com/zhiyouwu/p/11654442.html
+
+参考2：https://blog.csdn.net/u013857458/article/details/81866366
