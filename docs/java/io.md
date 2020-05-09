@@ -12,7 +12,7 @@
 
 ## Client-Server通讯
 
-### BIO-普通版
+### BIO普通版
 
 ```java
 //服务端代码示例：
@@ -122,7 +122,7 @@ public class InputStreamClient {
 
 
 
-### BIO-线程池增强版
+### BIO增强版（线程池）
 
 > 服务端增加线程池，每个客户端的连接，由线程池分配一个线程进行数据接收。
 
@@ -280,7 +280,7 @@ public class InputStreamClient2 {
 接收到客户端消息===>hello world 02
 ```
 
-### NIO-普通版
+### NIO版
 
 > 采用nio，无选择器
 
@@ -417,7 +417,7 @@ hello world 01
 hello world 02
 ```
 
-### NIO-选择器增强版
+### NIO增强版（选择器）
 
 ```java
 //服务端
@@ -686,6 +686,178 @@ len为：-1
 keys长度========>2！
 
 ```
+
+
+
+### Netty版
+
+服务端代码示例：
+```java
+package com.wykd.netty;
+
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.string.StringDecoder;
+
+public class NettyServer {
+    private final int port;
+
+    public NettyServer(int port) {
+        this.port = port;
+    }
+
+    public static void main(String[] args) throws Exception {
+        int port = 8086;
+        if (args.length == 1) {
+            port = Integer.parseInt(args[0]);
+        }
+        new NettyServer(port).run();
+    }
+
+    public void run() throws Exception {
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try {
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel ch) throws Exception {
+                            ch.pipeline().addLast(new StringDecoder()).addLast(new DemoServerHandler());
+                        }
+                    });
+
+            // Bind and start to accept incoming connections.
+            ChannelFuture f = b.bind(port).sync();
+
+            // Wait until the server socket is closed.
+            System.out.println(NettyServer.class.getName() + " started and listen on " + port);
+            f.channel().closeFuture().sync();
+        } finally {
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
+        }
+    }
+
+    class DemoServerHandler extends ChannelInboundHandlerAdapter {
+
+        @Override
+        public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            String inStr = (String) msg;
+            System.out.println("收到客户端消息: " + inStr);
+            String outStr = "来自服务端的消息: " + inStr + System.lineSeparator();
+            ByteBuf outBb = Unpooled.copiedBuffer(outStr.getBytes());
+            ctx.write(outBb);
+        }
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
+            // Close the connection when an exception is raised.
+            cause.printStackTrace();
+            ctx.close();
+        }
+
+        @Override
+        public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+            ctx.flush();
+        }
+
+    }
+}
+
+```
+
+
+客户端代码示例：
+```java
+package com.wykd.netty;
+
+import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.string.StringDecoder;
+
+
+public class NettyClient {
+    private String host;
+    private int port;
+
+    public NettyClient(String host, int port) {
+        this.host = host;
+        this.port = port;
+    }
+
+    public static void main(String[] args) throws Exception {
+        String host = "localhost";
+        int port = 8086;
+        if (args.length == 2) {
+            host = args[0];
+            port = Integer.parseInt(args[1]);
+        }
+        new NettyClient(host, port).run();
+    }
+
+    public void run() throws Exception {
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try {
+            Bootstrap b = new Bootstrap();
+            b.group(workerGroup)
+                    .channel(NioSocketChannel.class)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel ch) throws Exception {
+                            ch.pipeline().addLast(new StringDecoder()).addLast(new DemoClientHandler());
+                        }
+                    });
+
+            // Start the client.
+            ChannelFuture f = b.connect(host, port).sync(); 
+            System.out.println(NettyClient.class.getName() + " started and connected to " + host + ":" + port);
+            // Wait until the connection is closed.
+            f.channel().closeFuture().sync();
+        } finally {
+            workerGroup.shutdownGracefully();
+        }
+    }
+
+    class DemoClientHandler extends SimpleChannelInboundHandler {
+
+        @Override
+        public void channelActive(ChannelHandlerContext ctx) {
+            System.out.println("向服务端发送消息");
+            ctx.writeAndFlush(Unpooled.copiedBuffer("Hello!".getBytes()));
+        }
+
+        @Override
+        public void channelRead0(ChannelHandlerContext ctx, Object msg) {
+            String inStr = (String) msg;
+            System.out.println("收到服务端消息： " + inStr);
+        }
+
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
+            // Close the connection when an exception is raised.
+            cause.printStackTrace();
+            ctx.close();
+        }
+    }
+}
+
+```
+
+
 
 ## 文件复制（9种实现方式）
 

@@ -4,6 +4,8 @@
 
 ## MybatisPlus
 
+### SpringBoot引入MybatisPlus
+
 分页
 
 ```xml
@@ -366,7 +368,7 @@ public class MybatisPlusConfig {
 }
 ```
 
-## **代码生成器**
+### **代码生成器**
 
 code-generate
 
@@ -544,7 +546,13 @@ public class MpGenerator {
 
 ```
 
+### 开启热部署
 
+https://blog.csdn.net/Tomorrow_csdn/article/details/105615364
+
+### sql打印
+
+https://blog.csdn.net/xiaocy66/article/details/83309903
 
 ## JDBC
 
