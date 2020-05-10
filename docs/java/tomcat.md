@@ -493,11 +493,12 @@ public class WTomcat {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel clientChannel) throws Exception {
-
+							//顺序有要求，责任链模式，返回客户端，response编码必须是第一层
+                            //HttpResponseEncoder编码器,
                             clientChannel.pipeline().addLast(new HttpResponseEncoder());
-
+							//HttpRequestDecoder解码器，解析http协议->request
                             clientChannel.pipeline().addLast(new HttpRequestDecoder());
-
+							//业务处理
                             clientChannel.pipeline().addLast(new WTomcatHandler());
                         }
                     })

@@ -720,18 +720,24 @@ public class NettyServer {
     }
 
     public void run() throws Exception {
+        //主线程池
         EventLoopGroup bossGroup = new NioEventLoopGroup();
+        //从线程池
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 128)
+                	//保持长连接
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
+                        //客户端初始化处理
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new StringDecoder()).addLast(new DemoServerHandler());
+                            
+                            ch.pipeline().addLast(new StringDecoder())
+                                .addLast(new DemoServerHandler());
                         }
                     });
 
@@ -809,6 +815,7 @@ public class NettyClient {
     }
 
     public void run() throws Exception {
+        //单线程池
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
@@ -818,11 +825,13 @@ public class NettyClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new StringDecoder()).addLast(new DemoClientHandler());
+                            //先字符串解码，再处理业务数据
+                            ch.pipeline().addLast(new StringDecoder())
+                                .addLast(new DemoClientHandler());
                         }
                     });
 
-            // Start the client.
+            // 开启客户端，连接IP，以及端口
             ChannelFuture f = b.connect(host, port).sync(); 
             System.out.println(NettyClient.class.getName() + " started and connected to " + host + ":" + port);
             // Wait until the connection is closed.
@@ -847,6 +856,7 @@ public class NettyClient {
         }
 
         @Override
+        //异常处理
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) { // (4)
             // Close the connection when an exception is raised.
             cause.printStackTrace();
@@ -1234,3 +1244,56 @@ buffer.clear()===>	position:0 	 limit:1024 	capacity1024
 >
 
 ![Selector（选择器）](./io.assets/16363f5338f36c54.png)
+
+## Netty
+
+服务端时序图
+
+![1589095790010](./io.assets/1589095790010.png)
+
+客户端时序图：
+
+![1589095858265](./io.assets/1589095858265.png)
+
+### NioEventLoop
+
+> NioEventLoop聚合了多路复用器Selector，可以同时处理成百上千个客户端Channel
+
+```java
+EventLoopGroup bossGroup = new NioEventLoopGroup();
+```
+
+```java
+private static final int DEFAULT_EVENT_LOOP_THREADS = 
+    Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2));
+
+protected MultithreadEventLoopGroup(int nThreads, Executor executor, Object... args) {
+	super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, args);
+}
+```
+
+从上述源码中，NettyRuntime.availableProcessors() * 2，默认线程池大小为CPU个数*2
+
+### Reactor线程模型
+
+单线程模型
+
+![1589100011409](./io.assets/1589100011409.png)
+
+多线程模型：
+
+![1589100062465](./io.assets/1589100062465.png)
+
+主从Reactor多线程模型：
+
+![1589100181346](./io.assets/1589100181346.png)
+
+
+
+### 零拷贝
+
+### Pooled内存池
+
+### Pipeline
+
+![1589112482109](./io.assets/1589112482109.png)
