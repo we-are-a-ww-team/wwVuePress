@@ -33,7 +33,6 @@ module.exports = {
 				{ text: '分布式锁', link: '/distributedLock/distributedLock' },
 				{ text: '分布式事务', link: '/distributedTransaction/distributedTransaction' },
 				{ text: 'Mybatis', link: '/mybatis/mybatis' },
-				{ text: 'Netty', link: '/netty/netty' },
 				{ text: '设计模式', link: '/designerPattern/designerPattern' },
             ]
           },
@@ -108,7 +107,8 @@ module.exports = {
 				'jdk8',
 				'io',
 				'tomcat',
-				'rpc'
+				'rpc',
+				'hashmap'
 			],'/database/':[
 				'mysql',
 				'oracle',

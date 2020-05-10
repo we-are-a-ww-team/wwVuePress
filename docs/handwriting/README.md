@@ -29,3 +29,5 @@
 ## 手写简易版RedisClient
 
 [手写RedisClient](/middleware/redis.html#handwritten-redisclient)
+
+## 手写简易版HashMap
