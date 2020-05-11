@@ -675,15 +675,18 @@ public class TestCyclic {
 > set方法源码解读：
 
 ```java
+//ThreadLocal类核心代码：
 public void set(T value) {
     Thread t = Thread.currentThread();
     ThreadLocalMap map = getMap(t);
     if (map != null)
         map.set(this, value);
     else
+        //创建一个ThreadLocalMap对象，并赋值给当前线程的threadLocals属性
         createMap(t, value);
 }
 
+//第一次给当前线程的threadLocals赋值
 void createMap(Thread t, T firstValue) {
       t.threadLocals = new ThreadLocalMap(this, firstValue);
 }
@@ -694,8 +697,11 @@ ThreadLocalMap getMap(Thread t) {
 ```
 
 ```java
+//ThreadLocalMap类核心代码：
+//第一次新建Entry对象
 ThreadLocalMap(ThreadLocal<?> firstKey, Object firstValue) {
     table = new Entry[INITIAL_CAPACITY];
+    //计算下标
     int i = firstKey.threadLocalHashCode & (INITIAL_CAPACITY - 1);
     table[i] = new Entry(firstKey, firstValue);
     size = 1;
@@ -703,32 +709,30 @@ ThreadLocalMap(ThreadLocal<?> firstKey, Object firstValue) {
 }
 
  private void set(ThreadLocal<?> key, Object value) {
-
-     // We don't use a fast path as with get() because it is at
-     // least as common to use set() to create new entries as
-     // it is to replace existing ones, in which case, a fast
-     // path would fail more often than not.
-
      Entry[] tab = table;
      int len = tab.length;
      int i = key.threadLocalHashCode & (len-1);
 
+     //从索引当前位置往后遍历
      for (Entry e = tab[i];
           e != null;
           e = tab[i = nextIndex(i, len)]) {
          ThreadLocal<?> k = e.get();
 
+         //找到key值，则直接赋值，否则继续往下遍历寻找，下标+1
          if (k == key) {
              e.value = value;
              return;
          }
 
+         //清理脏引用
          if (k == null) {
              replaceStaleEntry(key, value, i);
              return;
          }
      }
 
+     //往下遍历，直至元素为空，则新建一个Entry对象，并赋值给当前下标的数组元素。
      tab[i] = new Entry(key, value);
      int sz = ++size;
      if (!cleanSomeSlots(i, sz) && sz >= threshold)
@@ -738,9 +742,9 @@ ThreadLocalMap(ThreadLocal<?> firstKey, Object firstValue) {
 
 > Get方法解读
 >
-> 
 
 ```java
+//ThreadLocal类核心代码：
 public T get() {
         Thread t = Thread.currentThread();
         ThreadLocalMap map = getMap(t);
@@ -752,7 +756,7 @@ public T get() {
                 return result;
             }
         }
-    	//若未取到值，则调用set方法，并返回初始值
+    	//若未取到值，则创建一个ThreadLocalMap,并赋予初始值。
         return setInitialValue();
     }
 
@@ -769,13 +773,45 @@ private T setInitialValue() {
 ```
 
 ```java
+//ThreadLocalMap核心代码
 private Entry getEntry(ThreadLocal<?> key) {
-            int i = key.threadLocalHashCode & (table.length - 1);
-            Entry e = table[i];
-            if (e != null && e.get() == key)
-                return e;
-            else
-                return getEntryAfterMiss(key, i, e);
-        }
+    int i = key.threadLocalHashCode & (table.length - 1);
+    Entry e = table[i];
+    if (e != null && e.get() == key)
+        return e;
+    else
+        //若下标元素为空，则向后遍历Entry数组寻找key。
+        return getEntryAfterMiss(key, i, e);
+}
+```
+
+
+
+> ThreadLocal内存泄露问题处理：
+>
+> 参考：https://www.jianshu.com/p/dde92ec37bd1
+>
+> ![img](./thread.assets/2615789-9107eeb7ad610325.png)
+>
+> 注意：Entry是弱引用，当ThreadLocal实例为null时，gc会把key进行回收。但多线程情况下，线程有可能重新使用，value永远无法被访问到，即出现内存泄露。
+>
+> 解决方案：在set方法中，判断了key==null时，对脏引用进行了清理，从而解决了内存泄露的问题
+>
+> if (k == null) {
+>         replaceStaleEntry(key, value, i);
+>         return;
+>  }
+
+```java
+
+static class Entry extends WeakReference<ThreadLocal<?>> {
+    /** The value associated with this ThreadLocal. */
+    Object value;
+
+    Entry(ThreadLocal<?> k, Object v) {
+        super(k);
+        value = v;
+    }
+}
 ```
 

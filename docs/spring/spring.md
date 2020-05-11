@@ -1,46 +1,56 @@
 # Spring 
 
-## Spring5模块结构图
+## 整体架构图
 
-![1587300521588](./spring.assets/1587300521588.png)
+> **Core**：包含Spring基本的核心工具类，Spring的其他组件都需要使用这个包中的工具类，是最基本的核心包
+>
+> **Beans**：该模块是访问配置文件、创建和管理bean以及Spring的IOC操作的所有类，该模块的核心是BeanFactory
+>
+> **Context**：该模块是基于core和bean构建，相当于对bean进行封装及扩展来对外提供使用，ApplicationContext接口是Context模块的核心
+>
+> 
+>
+> **BeanFactory与ApplicationContext 的区别：**
+>
+>  BeanFactory 容器实例化后并不会自动实例化 Bean，只有当 Bean
+> 被使用时 BeanFactory 容器才会对该 Bean 进行实例化与依赖关系的装配
+>
+> ApplicationContext 容器实例化后会自动对所有的单实例 Bean 进行实例化与
+> 依赖关系的装配，使之处于待用状态。
 
-### Spring模块介绍
 
-![1587299845885](./spring.assets/1587299845885.png)
 
-![1587300732691](./spring.assets/1587300732691.png)
+![这里写图片描述](./spring.assets/20180505214030958.png)
 
-![1587300756754](./spring.assets/1587300756754.png)
+### 各模块依赖关系
 
-![1587300845870](./spring.assets/1587300845870.png)
-
-![1587300918094](./spring.assets/1587300918094.png)
+> 注意：Spring-jdbc依赖于spring-tx
 
 ![1587300978943](./spring.assets/1587300978943.png)
 
-### Spring版本命名规则
+### 版本命名规则
 
-![1587305460950](./spring.assets/1587305460950.png)
+> Snapshot：快照版
+>
+> Release：稳定版
+>
+> GA：正式版
+>
+> M：里程碑版本
+>
+> RC：终测版
 
-### 源码构建
+### BeanFactory核心类
 
-![1587304897783](./spring.assets/1587304897783.png)
-
-### BeanFactory
+> BeanFactory：定义容器
+>
+> BeanDefinition：存放配置
+>
+> BeanDefinitionReader：读取配置
 
 ![ListableBeanFactory](./spring.assets/ListableBeanFactory-1587480527303.png)
 
-![1587480937516](./spring.assets/1587480937516.png)
 
-DispatcherServlet 加载：
-
-![1587481249045](./spring.assets/1587481249045.png)
-
-
-
-## Import的三种方式
-
-参考：https://blog.csdn.net/everyok/article/details/81350905
 
 
 
@@ -48,14 +58,14 @@ DispatcherServlet 加载：
 
 参考：https://www.cnblogs.com/enjoyjava/p/11622555.html
 
-**查看构建spring-framework的gradle的版本**
+**查看构建spring-framework的gradle的版本**：
 
 https://blog.csdn.net/chenweijiSun/article/details/104814564
 
-## SpringAOP
 
-## SpringMVC
 
-## Spring Cache
 
-## Spring Session
+
+
+
+## 

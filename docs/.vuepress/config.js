@@ -95,8 +95,14 @@ module.exports = {
 			],
 			'/spring/':[
 				'spring',
-				'springboot',
-				'springcloud',
+				'import',
+				'springAOP',
+				'springMVC'
+			],'/springboot/':[
+				'springboot'
+			],'/springcloud/':[
+				'springcloud'
+			],'/springcloudalibaba/':[
 				'springcloudalibaba'
 			],'/go/':[
 				'go'

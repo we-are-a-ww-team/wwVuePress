@@ -64,8 +64,19 @@ public boolean equals(Object anObject) {
 
 
 
-## LindedList双向链表的使用
+## Static关键字
+
+> **static方法不能调用非static方法**，非static方法却可以调用static方法。
+>
+> 主要原因是，static方法是在类加载的时候，已经可以引用；而非static方法则必须要新建对象，才能引用。即，认为static方法要早于非static方法，SDK编译不能通过。
+>
+> **static修饰的方法，变量，存放于方法区（运行时常量池），类加载后一直存在，不会消失；且被所有线程所共享。**
+
+## LindedList双向链表
 [https://www.cnblogs.com/yijinqincai/p/10964188.html](https://note.youdao.com/)
+
+
+
 
 
 

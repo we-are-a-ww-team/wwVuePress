@@ -10,9 +10,32 @@
 
 ![img](./jvm.assets/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAxNy85LzQvZGQzYjE1YjNkODgyNmZhZWFlMjA2Mzk3NmZiOTkyMTM_aW1hZ2VWaWV3Mi8wL3cvMTI4MC9oLzk2MC9mb3JtYXQvd2VicC9pZ25vcmUtZXJyb3IvMQ.jpg)
 
-- 方法区：线程共享，**运行时常量池**，存放**字符串常量**和**基本类型常量**（public static final）。
-- 堆（heap）：线程共享，用于存储**new的对象，数组**
-- 栈（stack）：线程独有，主要保存**基本数据类型变量**（char、byte、short、int、long、float、double、boolean）
+### JVM内存存放分析
+
+- 方法区：线程共享，运行时常量池。存储**基本类型常量**（public static final），**静态方法，静态变量**（static变量），class
+- 堆（heap）：线程共享，存储**new的对象（注意：不是对象引用，是对象本身），数组**
+- 栈（stack）：线程独有，存储**局部变量**，**对象的引用**
+
+#### 具体例子分析：
+
+![img](./jvm.assets/359b033b5bb5c9ea023ba6fe7e19b3053bf3b38c.jpeg)
+
+![img](./jvm.assets/f3d3572c11dfa9ec028d9199c8f0f206908fc147.jpeg)
+
+### 成员变量和局部变量的区别
+
+​    (1)在类中的位置不同
+​        成员变量：类中方法外
+​        局部变量：方法定义中或者方法声明上
+​    (2)在内存中的位置不同
+​        成员变量：在堆中
+​        局部变量：在栈中
+​    (3)生命周期不同
+​        成员变量：随着对象的创建而存在，随着对象的消失而消失
+​        局部变量：随着方法的调用而存在，随着方法的调用完毕而消失
+​    (4)初始化值不同
+​        成员变量：有默认值
+​        局部变量：没有默认值，必须定义，赋值，然后才能使用
 
 ## 栈内存
 
@@ -206,3 +229,6 @@ Exception in thread "main" java.lang.StackOverflowError
 | ---- | ---------- |
 | -Xms | 初始堆内存 |
 | -Xmx | 最大堆内存 |
+
+
+
