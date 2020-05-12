@@ -8,7 +8,7 @@
 >
 > **Context**：该模块是基于core和bean构建，相当于对bean进行封装及扩展来对外提供使用，ApplicationContext接口是Context模块的核心
 >
-> 
+> ![spring-context](./spring.assets/spring-context.png)
 >
 > **BeanFactory与ApplicationContext 的区别：**
 >

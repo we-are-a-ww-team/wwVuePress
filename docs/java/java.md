@@ -72,7 +72,128 @@ public boolean equals(Object anObject) {
 >
 > **static修饰的方法，变量，存放于方法区（运行时常量池），类加载后一直存在，不会消失；且被所有线程所共享。**
 
+## 泛型
+
+```
+//假设：Apple继承Fruit ,Fruit继承Food
+
+//只能指向泛型为Frult子类的Plate
+Plate<? extends Fruit> p=new Plate<Apple>();
+
+//只能指向泛型为Frult父类的Plate
+Plate<? super Fruit> a = new Plate<Food>();
+```
+
+## Array<-->ArrayList
+
+```java
+package com.wykd.array;
+
+import com.alibaba.fastjson.JSON;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class TestArrayList {
+
+
+    public static void main(String[] args) {
+
+        /**
+         * ArrayList --> Array
+         */
+        transArrayListToArray();
+
+        /**
+         * Array --> ArrayList
+         */
+        transArrayToArrayList();
+
+        listOther();
+
+        arrayOther();
+    }
+
+    /**
+     * ArrayList --> Array
+     */
+    private static void transArrayListToArray() {
+
+        List<String> list=new ArrayList<String>();
+        list.add("张三");
+        list.add("李四");
+        list.add("王五");
+        String[] array = list.toArray(new String[list.size()]);
+        System.out.println("数组长度："+array.length);
+        System.out.println("打印数组===>"+JSON.toJSONString(array));
+        System.out.println("");
+    }
+
+    /**
+     * Array --> ArrayList
+     */
+    private static void transArrayToArrayList() {
+
+        //写法1
+        String[] array=new String[3];
+        array[0]="张三";
+        array[1]="李四";
+        array[2]="王五";
+        List<String> list= Arrays.asList(array);
+        System.out.println("打印List===>"+JSON.toJSONString(list));
+        System.out.println("");
+    }
+
+    //Arraylist的其他操作
+    public static void listOther(){
+        //重写了ArrayList的add方法
+        ArrayList list1 = new ArrayList() {
+            @Override
+            public boolean add(Object o) {
+                String a = "hello";
+                return super.add(a);
+            }
+        };
+        list1.add("world");
+        System.out.println("list1===>"+JSON.toJSONString(list1));
+
+
+        //new ArrayList()后的第二层大括号，写add方法，相当于this.add
+        ArrayList list2 = new ArrayList() {
+            {
+                add("a");
+                add("b");
+            }
+        };
+        list2.add("c");
+        System.out.println("list2===>"+JSON.toJSONString(list2));
+
+        System.out.println("");
+    }
+
+
+    //array的其他写法
+    public static void arrayOther(){
+
+        String[] array = new String[]{"111","222"};
+        System.out.println("array==>"+JSON.toJSONString(array));
+
+        //写法2
+        //入参类型：T... a  ===> "赵","钱","孙","李" 等价于 new String[]{"赵","钱","孙","李"}
+        List<String> list1= Arrays.asList("赵","钱","孙","李");
+        System.out.println("list1===>"+JSON.toJSONString(list1));
+
+        List<String> list2= Arrays.asList(new String[]{"赵","钱","孙","李"});
+        System.out.println("list2===>"+JSON.toJSONString(list2));
+    }
+
+
+}
+```
+
 ## LindedList双向链表
+
 [https://www.cnblogs.com/yijinqincai/p/10964188.html](https://note.youdao.com/)
 
 
