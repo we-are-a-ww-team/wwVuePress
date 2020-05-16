@@ -232,3 +232,53 @@ Exception in thread "main" java.lang.StackOverflowError
 
 
 
+## GC ROOT 可达性分析算法
+
+> - GC Roots是一些由堆外指向堆内的引用：
+> - 将一系列被称为GC Roots的变量作为初始的存活对象合集，然后从该合集出发，所有能够被该集合引用到的对象，并将其加入到该集合中，而不能被该合集所引用到的对象，并可对其宣告死亡。
+
+
+
+GC Roots 对象包括如下几种：
+
+- 虚拟机栈中，栈桢中的局部变量引用的对象；
+- 方法区中的静态变量和常量引用的对象
+- 已启动且未停止的 Java 线程。
+
+
+
+## 回收复制算法：
+
+在进行minor gc 算法时，from->to，先将from区的对象进行gc回收，无法回收的对象，复制到to区，然后将from清空。
+
+每次执行了回收复制算法后，无法回收的对象，年龄+1，15次仍然未被回收的对象，转入老年代。
+
+
+
+
+
+
+
+## 内存泄露：
+
+GC Root无法回收的对象，就会造成内存泄露。
+
+典型例子：ArrayList的remove方法中，有避免内存泄露的例子。如下代码演示：
+
+```java
+ public E remove(int index) {
+        rangeCheck(index);
+
+        modCount++;
+        E oldValue = elementData(index);
+
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        elementData[--size] = null; // clear to let GC do its work
+
+        return oldValue;
+    }
+```
+

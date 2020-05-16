@@ -197,3 +197,61 @@ public V get(Object key) {
 
 
 ## jdk1.8-HashMap源码解读：
+
+红黑树参考：https://baijiahao.baidu.com/s?id=1641940303518144126&wfr=spider&for=pc
+
+Set方法源码解读
+
+```java
+ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                   boolean evict) {
+        Node<K,V>[] tab; Node<K,V> p; int n, i;
+        if ((tab = table) == null || (n = tab.length) == 0)
+            //若Node数组为空，则初始化一个Node数组
+            n = (tab = resize()).length;
+     
+        if ((p = tab[i = (n - 1) & hash]) == null)
+            //获取数组下标元素，若该坐标没有元素，则新建一个元素
+            tab[i] = newNode(hash, key, value, null);
+        else {
+            Node<K,V> e; K k;
+            if (p.hash == hash &&
+                ((k = p.key) == key || (key != null && key.equals(k))))
+                //若数组下标元素，hash值相等，且key值相等，则直接替换
+                e = p;
+            else if (p instanceof TreeNode)
+                //若数组下标元素是一个树节点类型，则进行树结构处理
+                e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+            else {
+                //链表处理，算法逻辑，参考jdk1.7版本HashMap
+                for (int binCount = 0; ; ++binCount) {
+                    if ((e = p.next) == null) {
+                        p.next = newNode(hash, key, value, null);
+                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                            //如果链表元素的长度>8，则转化成红黑树
+                            treeifyBin(tab, hash);
+                        break;
+                    }
+                    if (e.hash == hash &&
+                        ((k = e.key) == key || (key != null && key.equals(k))))
+                        break;
+                    p = e;
+                }
+            }
+            if (e != null) { // existing mapping for key
+                V oldValue = e.value;
+                if (!onlyIfAbsent || oldValue == null)
+                    e.value = value;
+                afterNodeAccess(e);
+                return oldValue;
+            }
+        }
+        ++modCount;
+        if (++size > threshold)
+            resize();
+        afterNodeInsertion(evict);
+        return null;
+    }
+```
+
+## ConcurrentMap源码解读：
