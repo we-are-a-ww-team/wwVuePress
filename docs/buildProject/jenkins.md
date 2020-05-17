@@ -51,7 +51,7 @@ find / -iname jenkins | xargs -n 1000 rm -rf
 
 ![1589645150864](./jenkins.assets/1589645150864.png)
 
-## 配置：
+## 配置一个Springboot的CICD：
 
 ### 全局配置jdk，maven
 
@@ -75,6 +75,10 @@ find / -iname jenkins | xargs -n 1000 rm -rf
 
 > 清空workspace，从git仓库取文件，进行构建
 
+```
+-DskipTests=true clean package
+```
+
 ![1589637036392](./jenkins.assets/1589637036392.png)
 
 ### 设置tomcat热部署
@@ -94,10 +98,14 @@ find / -iname jenkins | xargs -n 1000 rm -rf
 ### 部署配置
 
 > 前提：安装Deploy to a container插件
+>
+> 当前目录为项目根目录，所以可以编辑为：target/wspringbootwar.war
 
 ![1589645000427](./jenkins.assets/1589645000427.png)
 
 ### 添加hook，实现提交代码，出发构建以及部署
+
+![](./jenkins.assets/1589683917800.png)
 
 github配置jenkins的hook地址
 
@@ -106,6 +114,36 @@ github配置jenkins的hook地址
 触发器勾选github hook
 
 ![1589645063281](./jenkins.assets/1589645063281.png)
+
+## 配置一个Vue的CICD
+
+### 创建一个自由风格的任务
+
+![1589684020934](./jenkins.assets/1589684020934.png)
+
+### 安装插件：Nodejs
+
+构建环境，选择Provide Node & npm bin/ folder to PATH
+
+![1589684049134](./jenkins.assets/1589684049134.png)
+
+### 构建
+
+```
+npm install 
+rm -rf ./docs/.vuepress/dist/*    //当前目录为项目的根目录  
+npm run build
+rm -rf /usr/local/nginx/html/docs/*
+cp -rf ./docs/.vuepress/dist/* /usr/local/nginx/html/docs/
+```
+
+![1589684121468](./jenkins.assets/1589684121468.png)
+
+
+
+
+
+
 
 
 
