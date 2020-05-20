@@ -93,6 +93,20 @@ du -sh *
 查看当前目录文件夹的 容量占用情况
 ```
 
+## 查看文件的hash值
+
+```
+md5sum /works/Hello.txt 
+sha1sum /works/Hello.txt 
+sha256sum /works/Hello.txt
+```
+
+## 安装vim
+
+```
+yum install vim -y
+```
+
 
 
 ## 防火墙firewall
