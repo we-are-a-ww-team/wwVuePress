@@ -2,18 +2,18 @@
 
 ## 文件操作
 
-**ls用法**
+### **ls用法**
 
 ```
 ls -lrS  按大小反序显示文件详细信息
 ls *    列出当前目录，子级目录下所有文件（不包含子级的子级）
 ```
 
-**文件操作**
+### **文件操作**
 
 ```
 mkdir　　创建目录
-touch　　创建一个空文件
+touch　　创建一个空文件，更改文件的修改时间
 
 rm		删除
 	（rm -rf 强制遍历删除文件）
@@ -22,14 +22,19 @@ cp 		复制
 	（cp -r 	递归复制目录）
 ```
 
-**文件查找**
+### **文件查找**
 
 ```
+# 文本查找
 find ./ -name nginx
 find /etc -name　'init*'　　在/etc目录找init开头的文件
+
+# 内容查找
+# -i 忽略大小写   -n 显示行号  从nohup.out中找出jvm的行
+grep "jvm" -i -n nohup.out 
 ```
 
-**文件压缩，解压**
+### **文件压缩，解压**
 
 ```
 打包命令： 	tar -zcvf test.tar.gz test 	将test文件夹压缩成test.tar.gz
@@ -39,9 +44,9 @@ find /etc -name　'init*'　　在/etc目录找init开头的文件
 解压命令：	unzip test.zip 				解压为test目录
 ```
 
-## 文本操作
+## 文本文档操作
 
-**vi命令**
+### **vi命令**
 
 ```
 i	切换编辑模式
@@ -51,7 +56,7 @@ ESC 切换命令模式
 	(:set nu 显示行号)
 ```
 
-**文本查看**
+### **文本查看**
 
 ```
 tail -n 1000 aaa.log　　显示/etc/services文件最后1000行
@@ -101,13 +106,18 @@ sha1sum /works/Hello.txt
 sha256sum /works/Hello.txt
 ```
 
-## 安装vim
+## yum安装
 
 ```
+# 安装vim
 yum install vim -y
 ```
 
 
+
+## SSH
+
+> SSH 叫做 Secure Shell。通过 SSH，可以把传输数据进行加密，预防攻击，传输的数据进行了压缩，可以加快传输速度。
 
 ## 防火墙firewall
 
@@ -149,3 +159,18 @@ firewall-cmd --reload
 2、--permanent：表示设置为持久；
 3、--add-port：标识添加的端口；
 ```
+
+## Linux目录
+
+| 目录 | 说明                                                         |
+| :--- | :----------------------------------------------------------- |
+| bin  | 存放二进制可执行文件(ls,cat,mkdir等)                         |
+| etc  | 存放系统配置文件                                             |
+| home | 存放所有用户文件的根目录                                     |
+| lib  | 存放跟文件系统中的程序运行所需要的共享库及内核模块           |
+| opt  | 额外安装的可选应用程序包所放置的位置                         |
+| root | 超级用户目录                                                 |
+| sbin | 存放二进制可执行文件，只有root才能访问                       |
+| tmp  | 用于存放各种临时文件                                         |
+| usr  | 用于存放系统应用程序，比较重要的目录/usr/local 本地管理员软件安装目录 |
+| var  | 用于存放运行时需要改变数据的文件                             |

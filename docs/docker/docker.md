@@ -223,6 +223,8 @@ docker pull csuwwei/wwjdk8:1
 docker run -d -p 8082:8080 --name myjdk888 csuwwei/wwjdk8:1
 ```
 
+![1590068082237](./docker.assets/1590068082237.png)
+
 ## Docker安装服务器
 
 ### docker安装jenkins
