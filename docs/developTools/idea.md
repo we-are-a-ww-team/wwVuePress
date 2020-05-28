@@ -8,6 +8,8 @@
 
 **破解：**
 
+参考：https://www.52pojie.cn/thread-1062067-1-1.html
+
 ## settings
 
 maven设置：

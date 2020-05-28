@@ -88,20 +88,20 @@ minikube start --vm-driver=none
 minikube version
 ```
 
-### 安装容器
-
 ```
-
-```
-
-
-
-### 查看pod
-
-```
+# 查看pod
 kubectl get pods
 
 # 查看集群信息
 kubectl cluster-info
 ```
 
+```
+# 国内镜像启动
+minikube start --vm-driver=none  --registry-mirror=https://registry.docker-cn.com
+```
+
+```
+# 显示minikube服务
+minikube service list
+```

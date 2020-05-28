@@ -14,7 +14,7 @@ git log
 git config --global credential.helper store
 ```
 
-
+## 常用命令
 
 ```
 # .git 文件夹就是 repo
@@ -70,6 +70,25 @@ git pull
 
 
 
-git flow 流程：
+## git flow 流程：
 
 参考：https://www.cnblogs.com/wish123/p/9785101.html
+
+
+
+## 代码合并
+
+dev分支新代码，合并到master分支
+
+```
+
+
+git checkout dev
+git pull
+git checkout master
+git merge dev
+git push -u origin master
+
+
+```
+
