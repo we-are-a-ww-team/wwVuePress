@@ -26,8 +26,8 @@ module.exports = {
             items: [
 				{ text: 'Java基础', link: '/java/java' },
 				{ text: 'Spring', link: '/spring/spring' },
-				{ text: 'Springboot', link: '/spring/springboot' },
-				{ text: 'Springcloud', link: '/spring/springcloud' },
+				{ text: 'Springboot', link: '/springboot/springboot' },
+				{ text: 'Springcloud', link: '/springcloud/springcloud' },
 				{ text: 'Springcloud alibaba', link: '/spring/springcloudalibaba' },
 				{ text: '中间件', link: '/middleware/' },
 				{ text: '分布式锁', link: '/distributedLock/distributedLock' },
