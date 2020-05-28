@@ -76,7 +76,7 @@ public class UserService {
 ```
 
 ```java
-package com.wykd.oppo.user.model;
+package com.wykd.user.model;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableId;
@@ -92,6 +92,7 @@ import java.time.LocalDateTime;
  * 2020/4/8 11:00
  */
 @TableName("user_info")
+@Data
 public class UserModel implements Serializable {
 
     //标记数据表主键
@@ -99,80 +100,6 @@ public class UserModel implements Serializable {
     private int id;
     private String username;
     private String password;
-//    private int sex;
-//    private int age;
-//    private LocalDateTime createTime;
-//    //标记数据表中不存在的字段
-//    @TableField(exist = false)
-//    private String showName;
-//    //标记数据表中的column名
-//    @TableField("username")
-//    private String showUsername;
-
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-//    public int getSex() {
-//        return sex;
-//    }
-//
-//    public void setSex(int sex) {
-//        this.sex = sex;
-//    }
-//
-//    public int getAge() {
-//        return age;
-//    }
-//
-//    public void setAge(int age) {
-//        this.age = age;
-//    }
-//
-//    public LocalDateTime getCreateTime() {
-//        return createTime;
-//    }
-//
-//    public void setCreateTime(LocalDateTime createTime) {
-//        this.createTime = createTime;
-//    }
-//
-//    public String getShowName() {
-//        return showName;
-//    }
-//
-//    public void setShowName(String showName) {
-//        this.showName = showName;
-//    }
-//
-//    public String getShowUsername() {
-//        return showUsername;
-//    }
-//
-//    public void setShowUsername(String showUsername) {
-//        this.showUsername = showUsername;
-//    }
 }
 
 ```
@@ -192,7 +119,7 @@ public interface UserMapper extends BaseMapper<UserModel> {
 ```
 
 ```java
-package com.wykd.oppo.user.controller;
+package com.wykd.user.controller;
 
 /**
  * 功能：
@@ -200,8 +127,8 @@ package com.wykd.oppo.user.controller;
  * 2020/4/8 11:03
  */
 import com.baomidou.mybatisplus.plugins.Page;
-import com.wykd.oppo.user.model.UserModel;
-import com.wykd.oppo.user.service.UserService;
+import com.wykd.oppo.model.UserModel;
+import com.wykd.oppo.user.ce.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -281,7 +208,7 @@ public class UserController {
 <!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!-- 指明当前xml对应的Mapper -->
-<mapper namespace="com.wykd.oppo.user.mapper.UserMapper">
+<mapper namespace="com.wykd.user.mapper.UserMapper">
     <select id="listCount" resultType="Integer">
         select count(*) from user_info;
     </select>
@@ -289,13 +216,12 @@ public class UserController {
 
 ```
 
-```
-
-#\u8BBE\u7F6E\u63D0\u4F9B\u7684\u670D\u52A1\u540D
+```yml
+server:
+  port: 12000
 spring:
   application:
     name: javademo-tyh-service-base
-  #\u914D\u7F6E\u6570\u636E\u5E93
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
@@ -303,35 +229,21 @@ spring:
     username: root
     password: root
 
-#\u8BBE\u7F6E\u81EA\u5DF1\u542F\u52A8\u7684\u7AEF\u53E3
-server:
-  port: 12000
-
-
 
 
 #mybatis plus
 mybatis-plus:
-  #\u6307\u660Emapper.xml\u626B\u63CF\u4F4D\u7F6E(classpath* \u4EE3\u8868\u7F16\u8BD1\u540E\u7C7B\u6587\u4EF6\u6839\u76EE\u5F55)
   mapper-locations: classpath*:/mapper/**Mapper.xml
-  #\u6307\u660E\u5B9E\u4F53\u626B\u63CF(\u591A\u4E2Apackage\u7528\u9017\u53F7\u6216\u8005\u5206\u53F7\u5206\u9694)
   typeAliasesPackage: javademo.tyh.model.base;javademo.tyh.model.hotel;
   global-config:
-    #\u4E3B\u952E\u7C7B\u578B 0:\u6570\u636E\u5E93ID\u81EA\u589E, 1:\u7528\u6237\u8F93\u5165ID,2:\u5168\u5C40\u552F\u4E00ID (\u6570\u5B57\u7C7B\u578B\u552F\u4E00ID), 3:\u5168\u5C40\u552F\u4E00ID UUID
     id-type: 0
-    #\u5B57\u6BB5\u7B56\u7565(\u62FC\u63A5sql\u65F6\u7528\u4E8E\u5224\u65AD\u5C5E\u6027\u503C\u662F\u5426\u62FC\u63A5) 0:\u5FFD\u7565\u5224\u65AD,1:\u975ENULL\u5224\u65AD,2:\u975E\u7A7A\u5224\u65AD
     field-strategy: 2
-    #\u9A7C\u5CF0\u4E0B\u5212\u7EBF\u8F6C\u6362\u542B\u67E5\u8BE2column\u53CA\u8FD4\u56DEcolumn(column\u4E0B\u5212\u7EBF\u547D\u540Dcreate_time\uFF0C\u8FD4\u56DEjava\u5B9E\u4F53\u662F\u9A7C\u5CF0\u547D\u540DcreateTime\uFF0C\u5F00\u542F\u540E\u81EA\u52A8\u8F6C\u6362\u5426\u5219\u4FDD\u7559\u539F\u6837)
     db-column-underline: true
-    #\u662F\u5426\u52A8\u6001\u5237\u65B0mapper
     refresh-mapper: false
-    #\u6570\u636E\u5E93\u5927\u5199\u547D\u540D\u4E0B\u5212\u7EBF\u8F6C\u6362
-    #capital-mode: true
-
 
 ```
 
-```
+```xml
 generator.jdbc.driver=com.mysql.jdbc.Driver
 generator.jdbc.url=jdbc:mysql://localhost:3306/mydb?useUnicode=true&characterEncoding=utf8
 generator.jdbc.username=root
@@ -339,9 +251,9 @@ generator.jdbc.password=root
 
 ```
 
-```
+```java
 @SpringBootApplication
-@MapperScan("com.wykd.oppo.user.mapper")
+@MapperScan("com.wykd.user.mapper")
 public class ProjSpringbootMybatisPlusApplication {
 
     public static void main(String[] args) {
@@ -353,7 +265,7 @@ public class ProjSpringbootMybatisPlusApplication {
 
 
 
-```
+```java
 @Configuration
 public class MybatisPlusConfig {
 
