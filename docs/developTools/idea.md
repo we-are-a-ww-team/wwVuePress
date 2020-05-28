@@ -77,3 +77,17 @@ maven设置：
 	Alt+鼠标左键	  纵列选择：
 	Ctrl+Shirt+u	大小写转换：
 ```
+
+## IDEA springloaded热部署：
+
+https://segmentfault.com/a/1190000017439626
+
+## 热门插件：
+
+**打印最终的sql：Mybatis-log-plugin**
+
+**滚动条变宽 ：CodeGlance**
+
+**日志：lombok**
+
+**sql-mapper接口切换：Free-idea-mybatis**
