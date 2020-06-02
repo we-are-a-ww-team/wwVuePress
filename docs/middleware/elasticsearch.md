@@ -36,3 +36,7 @@ http://192.168.113.128:5601/
 ### 问题1：创建容器时[Warning] IPv4 forwarding is disabled. Networking will not work.
 
 https://blog.csdn.net/zhydream77/article/details/81902457
+
+### 问题2：启动elasticsearch容器，报错： max virtual memory areas vm.max_map_count [65530] is too low, increase to at leas
+
+https://blog.csdn.net/gulijiang2008/article/details/90447298
