@@ -91,3 +91,7 @@ https://segmentfault.com/a/1190000017439626
 **日志：lombok**
 
 **sql-mapper接口切换：Free-idea-mybatis**
+
+**自动生成工具：easy-code**
+
+**生成接口文档：DocumentAssistant**
