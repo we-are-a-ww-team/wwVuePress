@@ -274,6 +274,8 @@ public class DemoService04 implements IDemoService {
 
 ## Demo05：@Import(ImportBeanDefinitionRegistrar.class)
 
+修改bean属性：https://my.oschina.net/qrmc/blog/1811091
+
 ```java
 package com.wykd.bean.demo5;
 
