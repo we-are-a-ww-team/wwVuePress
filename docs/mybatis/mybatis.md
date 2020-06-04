@@ -458,7 +458,7 @@ public class MpGenerator {
 
 ```
 
-### 开启热部署
+### 开启mapper文件热部署
 
 https://blog.csdn.net/Tomorrow_csdn/article/details/105615364
 
@@ -468,11 +468,629 @@ https://blog.csdn.net/xiaocy66/article/details/83309903
 
 ## HandWritten-Mybatis
 
+### 入口类：
+
+```java
+
+
+import java.util.List;
+
+import com.alibaba.fastjson.JSON;
+import com.wykd.config.WConfiguration;
+import com.wykd.dao.IUserDao;
+import com.wykd.proxy.DynamicProxy;
+import com.wykd.sqlsession.WSqlSession;
+import com.wykd.sqlsession.WSqlSessionFactory;
+import com.wykd.vo.User;
+
+public class TestMybatis {
+
+	
+	public static void main(String[] args) {
+		new TestMybatis().test01();
+	}
+	
+	/**
+	 * ibatis测试
+	 */
+	public void test01() {
+		WConfiguration config = new WConfiguration();
+		WSqlSession sqlSession = WSqlSessionFactory.openSession(config);
+		List<User> list = sqlSession.selectList("com.wykd.dao.IUserDao.getUserList", null);
+		System.out.println(JSON.toJSON(list));
+	}
+	
+	/**
+	 * Mybatis测试
+	 */
+	public void test02() {
+		WConfiguration config = new WConfiguration();
+		WSqlSession sqlSession = WSqlSessionFactory.openSession(config);
+		DynamicProxy proxy = new DynamicProxy(sqlSession);
+		
+		
+		IUserDao userDao = (IUserDao) proxy.getInstance(IUserDao.class);
+		List<User> list = userDao.getUserList();
+		System.out.println(JSON.toJSON(list));
+		
+	}
+}
+
+```
+
+### 配置
+
+pom.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.wykd</groupId>
+    <version>1.0-SNAPSHOT</version>
+    <artifactId>ww-handwritten-mybatis</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.68</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.48</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+    </dependencies>
+
+</project>
+```
+
+userMapper.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="com.wykd.dao.IUserDao">
+
+    <select id="selectUsers" parameterType="com.wykd.vo.User">
+       	select * from sec_user
+    </select>
+    
+    
+    <select id="selectUserById" parameterType="com.wykd.vo.User">
+       	select * from sec_user where id = 1
+    </select>
+    
+</mapper>
+```
+
+jdbc.properties
+
+```properties
+db.driverClass=com.mysql.jdbc.Driver
+db.url=jdbc:mysql://120.24.87.121:3307/wang?useSSL=false
+db.username=root
+db.password=root
+
+```
+
+### Configuration
+
+Configuration类
+
+```java
+package com.wykd.config;
+
+import java.io.File;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+
+public class WConfiguration {
+
+	//将连接数据库信息放到WConfiguration中
+	
+	//将接口，对应的mapper放到WConfiguration中
+	private Map<String,WMapper> batisMapper = new HashMap<String,WMapper>();
+	
+	
+	public WConfiguration() {
+		doScanMapper();
+	}
+	
+	/**
+	 * 扫描 xml文件，将信息保存在batisMapper中
+	 */
+	public void doScanMapper() {
+		
+		
+//		scanPackageClass("");
+		
+		WMapper mapper01 = new WMapper();
+		mapper01.setMethodId("com.wykd.dao.IUserDao");
+		mapper01.setNamespace("getUserList");
+		mapper01.setSql("select * from sec_user");
+		mapper01.setReturnType("com.wykd.vo.User");
+		batisMapper.put("com.wykd.dao.IUserDao.getUserList", mapper01);
+		
+		
+		WMapper mapper02 = new WMapper();
+		mapper02.setMethodId("com.wykd.dao.IUserDao");
+		mapper02.setNamespace("selectUserById");
+		mapper02.setSql("select * from sec_user where id = 1");
+		mapper02.setReturnType("com.wykd.vo.User");
+		batisMapper.put("com.wykd.dao.IUserDao.selectUserById", mapper02);
+	}
+
+	public Map<String, WMapper> getBatisMapper() {
+		return batisMapper;
+	}
+	
+	private void scanPackageClass(String packagePath) {
+		
+		packagePath = packagePath.replaceAll("\\.", "/");
+//		System.out.println(packagePath);
+		URL url = this.getClass().getClassLoader().getResource(packagePath);
+//		System.out.println(url.getFile());
+		
+		File packageFile = new File(url.getFile());
+		File[] files = packageFile.listFiles();
+		for (int i = 0; i < files.length; i++) {
+			File file = files[i];
+			if(!file.isDirectory()) {
+				
+//				System.out.println("扫描的文件名为："+packagePath +"/"+ file.getName());
+				
+				String absolutePaht = (packagePath +"/"+ file.getName())
+						.replaceAll("/", "\\.")
+						.replaceAll(".class", "");
+				
+				
+//				System.out.println("扫描的文件名为======================>"+absolutePaht);
+				
+			}else {
+				scanPackageClass(packagePath +"/"+ file.getName());
+			}
+		}
+		
+		
+	}
+	
+	
+}
+
+```
+
+Mapping类
+
+```java
+package com.wykd.config;
+
+public class WMapper {
+
+	private String namespace ;
+	
+	private String methodId ;
+	
+	private String sql;
+	
+	private String returnType;
+
+	public String getNamespace() {
+		return namespace;
+	}
+
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
+	}
+
+	public String getMethodId() {
+		return methodId;
+	}
+
+	public void setMethodId(String methodId) {
+		this.methodId = methodId;
+	}
+
+	public String getSql() {
+		return sql;
+	}
+
+	public void setSql(String sql) {
+		this.sql = sql;
+	}
+
+	public String getReturnType() {
+		return returnType;
+	}
+
+	public void setReturnType(String returnType) {
+		this.returnType = returnType;
+	}
+	
+}
+
+```
+
+### Proxy
+
+```java
+package com.wykd.proxy;
+
+import java.lang.reflect.Proxy;
+
+import com.wykd.config.WConfiguration;
+import com.wykd.dao.IUserDao;
+import com.wykd.sqlsession.WSqlSession;
+
+public class DynamicProxy {
+
+	private  WSqlSession sqlSession ;
+	
+	public DynamicProxy() {
+		
+	}
+	
+	public DynamicProxy(WSqlSession sqlSession ) {
+		this.sqlSession = sqlSession;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(new DynamicProxy().getClass().getCanonicalName());
+	}
+	
+	public Object getInstance(Class<IUserDao> class1) {
+		Object obj = Proxy.newProxyInstance(class1.getClassLoader(), new Class[] {class1}, 
+				new MybatisHandler(sqlSession));
+		return obj;
+	}
+
+	
+	
+}
+
+```
+
+```java
+package com.wykd.proxy;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.util.Collection;
+
+import com.wykd.config.WConfiguration;
+import com.wykd.sqlsession.WSqlSession;
+
+public class MybatisHandler implements InvocationHandler{
+
+	private WSqlSession sqlSession;
+	
+	
+	public MybatisHandler(WSqlSession sqlSession) {
+		this.sqlSession = sqlSession;
+	}
+	
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		
+		Object ret = null;
+		//根据返回的类型，执行sqlSession的方法
+		Class<?> clazz = method.getReturnType();
+		
+		if(Collection.class.isAssignableFrom(clazz)) {
+			ret = sqlSession.selectList(method.getDeclaringClass().getName()+"."+method.getName(), args);
+		}else {
+			ret = sqlSession.selectOne(method.getDeclaringClass().getName()+"."+method.getName(), args);
+		}
+		return ret;
+	}
+}
+
+```
 
 
 
+### SqlSession
+
+```java
+package com.wykd.sqlsession;
+
+import com.wykd.config.WConfiguration;
+
+public class WSqlSessionFactory {
+
+	
+	
+	public static WSqlSession openSession(WConfiguration config) {
+		return new DefaultSqlSession(config);
+	}
+
+}
+
+```
+
+```java
+package com.wykd.sqlsession;
+
+import java.util.List;
+
+import com.wykd.vo.User;
+
+public interface WSqlSession {
+
+	User selectOne(String statement, Object[] args);
+	
+	List<User> selectList(String statement, Object[] args);
+
+}
+
+```
+
+```java
+package com.wykd.sqlsession;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+import com.wykd.config.WConfiguration;
+import com.wykd.config.WMapper;
+import com.wykd.vo.User;
+
+public class DefaultSqlSession implements WSqlSession {
+
+	private WExecutor executor = new WExecutor();
+	
+	private WConfiguration config;
+	
+	public DefaultSqlSession(WConfiguration config) {
+		this.config = config;
+	}
+	
+	
+	
+	public WConfiguration getConfig() {
+		return config;
+	}
+
+	public User selectOne(String statement, Object[] args) {
+		System.out.println(statement);
+		
+		
+		List<User> list = selectList(statement ,args);
+		
+		
+		return list.get(0);
+	}
+
+	public List<User> selectList(String statement,Object[] args) {
+		//根据statement解析sql
+		Map<String, WMapper> mapper = config.getBatisMapper();
+		WMapper wMapper = (WMapper) mapper.get(statement);
+		String sql  = wMapper.getSql();
+//		ResultSet result = null;
+		
+		return executor.selectData(sql ,args);
+//		try {
+//			result = executor.selectData(sql ,args);
+//			while(result.next()) {
+//				System.out.println(result.getString("username"));
+//			}
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		 //将ResultSet转化成 mapper.xml配置的returnType对象
+//		 
+//		 
+//		 return null;
+	}
+}
+
+```
+
+```java
+package com.wykd.sqlsession;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.PreparedStatement;
+import com.wykd.vo.User;
+
+public class WExecutor {
+	
+	private Properties properties = new Properties(); // 配置文件
+	
+	private static String url ;
+	private static String username ;
+	private static String password ;
+	private static String driver;
+	
+	public WExecutor() {
+		getScanPackagePath();
+	}
+	
+	
+	public <T> List<T> selectData(String sql, Object[] args) {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<User> list = new ArrayList();
+		try {
+			Connection conn = getConn();
+			pstmt = (PreparedStatement) conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			list = transform2Object(rs);
+			
+			return (List<T>) list;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return (List<T>) list;
+
+	}
 
 
+	private List<User> transform2Object(ResultSet rs) throws SQLException {
+		
+		List<User> list = new ArrayList();
+		
+		int col = rs.getMetaData().getColumnCount();
+		
+		ResultSetMetaData rsmd = rs.getMetaData();
+		
+//		System.out.println(rsmd.getColumnName(1));
+//		System.out.println("============================");
+		while (rs.next()) {
+			User user = new User();
+			for (int i = 1; i <= col; i++) {
+//				System.out.print(rs.getString(i) + "\t");
+//				
+//				if ((i == 2) && (rs.getString(i).length() < 8)) {
+//					System.out.print("\t");
+//				}
+				
+				
+				if("id".equalsIgnoreCase(rs.getMetaData().getColumnName(i))) {
+					user.setId(rs.getInt(i));
+				}
+				if("username".equalsIgnoreCase(rs.getMetaData().getColumnName(i))) {
+					user.setUsername(rs.getString(i));
+				}
+				if("password".equalsIgnoreCase(rs.getMetaData().getColumnName(i))) {
+					user.setPassword(rs.getString(i));
+				}
+				
+				
+			}
+			list.add(user);
+//			System.out.println("");
+		}
+//		System.out.println("============================");
+		
+		
+		return list;
+	}
+
+	private static Connection getConn() {
+//		String driver = "com.mysql.jdbc.Driver";
+//		String url = "jdbc:mysql://120.78.168.84:3306/wykddb?useSSL=false";
+//		String username = "root";
+//		String password = "2048";
+		Connection conn = null;
+		try {
+			Class.forName(driver); // classLoader,加载对应驱动
+			conn = (Connection) DriverManager.getConnection(url, username, password);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return conn;
+	}
+
+	
+	
+	private void getScanPackagePath() {
+
+		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("jdbc.properties");
+		try {
+			properties.load(inputStream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.driver = properties.getProperty("db.driverClass");
+		this.url = properties.getProperty("db.url");
+		this.username = properties.getProperty("db.username");
+		this.password = properties.getProperty("db.password");
+	}
+}
+
+```
+
+
+
+### Dao
+
+```java
+package com.wykd.dao;
+
+import java.util.List;
+
+import com.wykd.vo.User;
+
+public interface IUserDao {
+
+	/**
+	 * 
+	 * @return
+	 */
+	public List<User> getUserList();
+	
+	public  User getUserById();
+	
+}
+
+```
+
+### VO
+
+```java
+package com.wykd.vo;
+
+public class User {
+	private int id ;
+	private String username ;
+	private String password ;
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+}
+
+```
 
 
 

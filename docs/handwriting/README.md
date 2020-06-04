@@ -14,6 +14,8 @@
 
 ## 手写简易版Mybatis
 
+[手写Mybatis](/mybatis/mybatis.html#handwritten-mybatis)
+
 ## 手写简易版ThreadPool
 
 [手写固定大小线程池](/java/thread.html#handwritten-threadpool)

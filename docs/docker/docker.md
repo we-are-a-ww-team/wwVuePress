@@ -38,6 +38,9 @@ docker run -p 6379:6379 -d redis:latest redis-server  启动一个redis容器
 	（-v  挂载文件目录，即映射一个宿主机目录）
 	（-d  后台运行）
 	（--name 容器命名）
+	
+# 将宿主机的文件，拷贝到容器内部	
+docker cp /usr/local/soft/elasticsearch-analysis-ik-6.4.0.zip es:/usr/share/elasticsearch/plugins/ik/	
 ```
 
 
