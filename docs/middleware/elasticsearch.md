@@ -296,57 +296,252 @@ GET http://192.168.113.128:9200/accounts/person/2?pretty=true
 
 ## Kibana操作
 
-```
-# 查询user包含“王五”的记录
+### match 匹配查询
 
+```
+# 匹配某个字段
 GET _search
 {
   "query": {
-    "match": {"user": "王五"}
+    "match": {"name":"大家"}
+  }
+}
+
+# 匹配索引下的某个字段  match
+GET testdoct/testbean/_search
+{
+  "query": {
+    "match": {"name":"大家"}
   }
 }
 ```
 
-返回结果：
+### 所有数据查询
+```
+# 查询所有，默认10条记录
+GET testdoct/testbean/_search
+{
+  "query":{
+    "match_all": {}
+  }
+}
+
+# 只返回name字段,且只返回5条数据
+GET testdoct/testbean/_search
+{
+  "size": 5, 
+  "_source":["name"],
+  "query":{
+    "match_all": {}
+  }
+}
+```
+### 精准匹配
+```
+# standard分词器，把中文分割为一个一个字，查词组会查询不到结果
+GET testdoct/testbean/_search
+{
+  "query":{
+    "term":{"name":"谛"}
+  }
+}
+```
+
+### 查询 query_string
+```
+# query_string
+GET testdoct/testbean/_search
+{"query":{
+    "query_string": {
+      "default_field": "name",  //默认字段
+      "query": "轩谛"
+    }
+  }
+}
+```
+
+
+
+## 中文分词器：
+
+安装参考：https://blog.csdn.net/u012211603/article/details/90757253
+
+### standard分词器
 
 ```
+# 标准分词器
+POST testdoct/_analyze
 {
-  "took": 6,
-  "timed_out": false,
-  "_shards": {
-    "total": 21,
-    "successful": 21,
-    "skipped": 0,
-    "failed": 0
-  },
-  "hits": {
-    "total": 2,
-    "max_score": 1.3862944,
-    "hits": [
-      {
-        "_index": "accounts",
-        "_type": "person",
-        "_id": "Nrr8d3IBHqYqLAHV6tGZ",
-        "_score": 1.3862944,
-        "_source": {
-          "user": "王五",
-          "title": "程序员",
-          "desc": "管理员"
-        }
-      },
-      {
-        "_index": "accounts",
-        "_type": "person",
-        "_id": "OLoHeHIBHqYqLAHVq9Fl",
-        "_score": 0.5753642,
-        "_source": {
-          "user": "王五-2",
-          "title": "程序员",
-          "desc": "管理员"
-        }
-      }
-    ]
-  }
+  "analyzer": "standard", 
+  "text":"我们都是Java程序员"
+}
+
+
+返回结果：
+{
+  "tokens": [
+    {
+      "token": "我",
+      "start_offset": 0,
+      "end_offset": 1,
+      "type": "<IDEOGRAPHIC>",
+      "position": 0
+    },
+    {
+      "token": "们",
+      "start_offset": 1,
+      "end_offset": 2,
+      "type": "<IDEOGRAPHIC>",
+      "position": 1
+    },
+    {
+      "token": "都",
+      "start_offset": 2,
+      "end_offset": 3,
+      "type": "<IDEOGRAPHIC>",
+      "position": 2
+    },
+    {
+      "token": "是",
+      "start_offset": 3,
+      "end_offset": 4,
+      "type": "<IDEOGRAPHIC>",
+      "position": 3
+    },
+    {
+      "token": "java",
+      "start_offset": 4,
+      "end_offset": 8,
+      "type": "<ALPHANUM>",
+      "position": 4
+    },
+    {
+      "token": "程",
+      "start_offset": 8,
+      "end_offset": 9,
+      "type": "<IDEOGRAPHIC>",
+      "position": 5
+    },
+    {
+      "token": "序",
+      "start_offset": 9,
+      "end_offset": 10,
+      "type": "<IDEOGRAPHIC>",
+      "position": 6
+    },
+    {
+      "token": "员",
+      "start_offset": 10,
+      "end_offset": 11,
+      "type": "<IDEOGRAPHIC>",
+      "position": 7
+    }
+  ]
+}
+
+
+```
+
+### ik_smart分词器：
+
+```
+# ik分词器
+POST testdoct/_analyze
+{
+  "analyzer": "ik_smart", 
+  "text":"我们都是Java程序员"
+}
+
+返回结果：
+{
+  "tokens": [
+    {
+      "token": "我们",
+      "start_offset": 0,
+      "end_offset": 2,
+      "type": "CN_WORD",
+      "position": 0
+    },
+    {
+      "token": "都是",
+      "start_offset": 2,
+      "end_offset": 4,
+      "type": "CN_WORD",
+      "position": 1
+    },
+    {
+      "token": "java",
+      "start_offset": 4,
+      "end_offset": 8,
+      "type": "ENGLISH",
+      "position": 2
+    },
+    {
+      "token": "程序员",
+      "start_offset": 8,
+      "end_offset": 11,
+      "type": "CN_WORD",
+      "position": 3
+    }
+  ]
+}
+```
+
+### ik_max_word分词器：
+
+```
+# ik分词器
+POST testdoct/_analyze
+{
+  "analyzer": "ik_max_word", 
+  "text":"我们都是Java程序员"
+}
+
+{
+  "tokens": [
+    {
+      "token": "我们",
+      "start_offset": 0,
+      "end_offset": 2,
+      "type": "CN_WORD",
+      "position": 0
+    },
+    {
+      "token": "都是",
+      "start_offset": 2,
+      "end_offset": 4,
+      "type": "CN_WORD",
+      "position": 1
+    },
+    {
+      "token": "java",
+      "start_offset": 4,
+      "end_offset": 8,
+      "type": "ENGLISH",
+      "position": 2
+    },
+    {
+      "token": "程序员",
+      "start_offset": 8,
+      "end_offset": 11,
+      "type": "CN_WORD",
+      "position": 3
+    },
+    {
+      "token": "程序",
+      "start_offset": 8,
+      "end_offset": 10,
+      "type": "CN_WORD",
+      "position": 4
+    },
+    {
+      "token": "员",
+      "start_offset": 10,
+      "end_offset": 11,
+      "type": "CN_CHAR",
+      "position": 5
+    }
+  ]
 }
 ```
 
