@@ -2,7 +2,9 @@
 
 > **注意：elasticSearch与kibana尽量保持版本一致，可减少不必要的麻烦**
 
-## Docker安装ElasticSearch
+## 安装
+
+### Docker安装ElasticSearch
 
 ```
 docker run -d -p 9200:9200 -p 9300:9300 -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" --name=myes elasticsearch:6.4.0
@@ -18,7 +20,7 @@ http://192.168.113.128:9200/
 
 
 
-## Docker安装kibana
+### Docker安装kibana
 
 ```
 docker run --name mykibana3 -d -p 5601:5601 --link myes -e "ELASTICSEARCH_URL=http://192.168.113.128:9200" kibana:6.4.0
@@ -29,7 +31,7 @@ docker run --name mykibana3 -d -p 5601:5601 --link myes -e "ELASTICSEARCH_URL=ht
 http://192.168.113.128:5601/
 ```
 
-## 安装成功测试
+### 安装成功测试
 
 ```
 http://192.168.113.128:9200/
@@ -544,6 +546,54 @@ POST testdoct/_analyze
   ]
 }
 ```
+
+
+
+## Java代码实现
+
+### TransportClient连接
+
+pom.xml
+
+```xml
+<dependency>
+    <groupId>org.elasticsearch.client</groupId>
+    <artifactId>transport</artifactId>
+    <version>6.2.4</version>
+</dependency>
+```
+
+> 查询记录
+
+```java
+public static void main( String[] args )
+    {
+        //指定集群
+        Settings settings = Settings.builder().put("cluster.name","docker-cluster").build();
+        try {
+            //创建连接
+            TransportClient client = new PreBuiltTransportClient(settings)
+                                        .addTransportAddress(new TransportAddress(InetAddress.getByName("120.24.170.89"),9300));
+
+            //查找索引：demo    类型：person    id:1
+            GetResponse response = client.prepareGet("demo","person","1").execute().actionGet();
+            System.out.println(response.getSourceAsString());
+
+            client.close();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+    }
+```
+
+
+
+### ElasticsearchTemplate连接
+
+### ElasticsearchRepository连接
+
+
 
 ## FAQ
 

@@ -83,7 +83,8 @@ module.exports = {
 				'rocketmq',
 				'elasticsearch',
 				'shardingjdbc',
-				'kafka'
+				'kafka',
+				'zookeeper',
 			],
 			'/buildProject/':[
 				'',
@@ -107,7 +108,10 @@ module.exports = {
 			],'/springcloud/':[
 				'springcloud'
 			],'/springcloudalibaba/':[
-				'springcloudalibaba'
+				'springcloudalibaba',
+				'nocos',
+				'sentinel',
+				'seata'
 			],'/go/':[
 				'go'
 			],'/java/':[
