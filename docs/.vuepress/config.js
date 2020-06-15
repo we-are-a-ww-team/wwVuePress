@@ -9,7 +9,7 @@ module.exports = {
         }]
     ],
     dest: './docs/.vuepress/dist',
-	base:'/docs/',
+	base:'/',
     ga: '',
     evergreen: true,
 	themeConfig: {

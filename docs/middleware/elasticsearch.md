@@ -59,7 +59,9 @@ http://192.168.113.128:9200/
 }
 ```
 
+### Docker安装客户端Head安装
 
+参考：https://www.cnblogs.com/afeige/p/10771140.html
 
 ## Postman基本操作
 
@@ -591,9 +593,202 @@ public static void main( String[] args )
 
 ### ElasticsearchTemplate连接
 
+引入spring-boot-starter-data-elasticsearch的包
+
+```xml
+ <dependency>
+     <groupId>org.springframework.boot</groupId>
+     <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+     <version>2.1.10.RELEASE</version>
+ </dependency>
+```
+
+application.yml
+
+```yml
+server:
+  port: 9030
+  servlet:
+    context-path: /ww-es
+spring:
+  elasticsearch:
+    rest:
+      uris: http://120.24.170.89:9200
+  data:
+    elasticsearch:
+      cluster-name: docker-cluster
+      cluster-nodes: 120.24.170.89:9300
+      repositories:
+        enabled: true
+```
+
+ElasticsearchTemplate代码示例：
+
+```java
+package com.wykd.es.tamplate.dao;
+
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.client.Client;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Iterator;
+
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class ElasticsearchTemplateTest {
+
+    @Autowired
+    ElasticsearchTemplate elasticsearchTemplate;
+    @Test
+    public void test2(){
+        Client client = elasticsearchTemplate.getClient();
+        //查询index=book   type=book  id=zcvgiHIBBtMsYtNUJZFY的记录
+        GetResponse response = client.prepareGet("book", "book", "zcvgiHIBBtMsYtNUJZFY").get();
+        System.out.println(response.getSource());
+    }
+
+
+}
+
+```
+
 ### ElasticsearchRepository连接
 
+```java
+package com.wykd.es.tamplate.dao;
 
+
+import com.wykd.es.tamplate.vo.Book;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface BookRepository extends ElasticsearchRepository<Book, String> {
+    List<Book> findByPrice(Integer price);
+}
+
+```
+
+实体类：
+
+```java
+package com.wykd.es.tamplate.vo;
+
+import lombok.Data;
+import org.springframework.data.elasticsearch.annotations.Document;
+
+@Data
+@Document(indexName = "book",type = "book", shards = 1,replicas = 0, refreshInterval = "-1")
+public class Book {
+
+    //注意 实现的实体类必须指定id属性 不然会报异常
+    private Integer id;
+    private String bookName;
+    private String author;
+    private String publish;
+    private Integer price;
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "id=" + id +
+                ", bookName='" + bookName + '\'' +
+                ", author='" + author + '\'' +
+                ", publish='" + publish + '\'' +
+                ", price=" + price +
+                '}';
+    }
+}
+
+```
+
+接口类：继承ElasticsearchRepository类
+
+```java
+package com.wykd.es.tamplate.dao;
+
+
+import com.wykd.es.tamplate.vo.Book;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface BookRepository extends ElasticsearchRepository<Book, String> {
+    List<Book> findByPrice(Integer price);
+}
+```
+
+测试类：
+
+```java
+package com.wykd.es.tamplate.dao;
+
+import com.wykd.es.tamplate.vo.Book;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Iterator;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class BookRepositoryTest {
+
+    @Autowired
+    BookRepository bookRepository;
+
+    @Test
+    public  void  test1(){
+        Book book=new Book();
+        book.setAuthor("张三");
+        book.setBookName("javv从入门到放弃");
+        book.setPrice(24);
+        book.setPublish("出版社");
+        bookRepository.save(book);
+
+
+        Iterable<Book> all = bookRepository.findAll();
+        Iterator<Book> iterator = all.iterator();
+        while(iterator.hasNext()) {
+            Book next = iterator.next();
+            System.out.println(next);
+        }
+    }
+}
+
+```
+
+## 基本信息查看命令
+
+```
+http://192.168.113.128:9200/_cat/
+```
+
+## 跨域问题
+
+```
+# 修改elasticsearch.yml
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+```
+
+## ELK
+
+### Filebeat+LogStash+ES+Kibana
+
+参考：https://blog.csdn.net/forezp/article/details/98322521
 
 ## FAQ
 

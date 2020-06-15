@@ -1,6 +1,6 @@
 # Linux
 
-## 文件操作
+## 文件操作命令
 
 ### **ls用法**
 
@@ -44,7 +44,7 @@ grep "jvm" -i -n nohup.out
 解压命令：	unzip test.zip 				解压为test目录
 ```
 
-## 文本文档操作
+## 文本文档操作命令
 
 ### **vi命令**
 
@@ -76,7 +76,7 @@ N：反向重复前一个搜索（与 / 或 ? 有关）
 
 
 
-## 查看线程
+## 查看线程命令
 
 ```
 ps -ef | grep nginx   查看进程
@@ -88,7 +88,7 @@ netstat -natp  	查看网络端口
 man 2 select  查看linux内核方法
 ```
 
-## 查看容量
+## 查看容量命令
 
 ```
 df -h 
@@ -98,13 +98,28 @@ du -sh *
 查看当前目录文件夹的 容量占用情况
 ```
 
-## 查看文件的hash值
+## 查看文件的hash值命令
 
 ```
 md5sum /works/Hello.txt 
 sha1sum /works/Hello.txt 
 sha256sum /works/Hello.txt
 ```
+
+## History命令
+
+```
+# 清除history内存记录
+history -c
+# 查看历史命令，3条
+history 3  
+# 从历史命令中查找
+hisotry | grep "nginx -s"
+# 执行历史命令中的第100条命令
+! 100
+```
+
+
 
 ## yum安装
 

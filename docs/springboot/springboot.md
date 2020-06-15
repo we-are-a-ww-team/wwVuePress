@@ -75,3 +75,24 @@ public class TestRestTemplate {
 ## 集成mybatisPlus
 
 https://www.cnblogs.com/taiyonghai/p/9284269.html
+
+
+
+## Springboot集成shiro
+
+参考：https://www.jianshu.com/p/7f724bec3dc3
+
+
+
+## Springboot集成WebSocket
+
+参考：https://blog.csdn.net/qq_35387940/article/details/93483678
+
+
+
+## Springboot集成SpringCache
+
+参考：https://blog.csdn.net/chachapaofan/article/details/88829265
+
+## Springboot集成Swagger
+参考：https://www.cnblogs.com/hanstrovsky/p/12725112.html
