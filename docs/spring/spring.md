@@ -62,10 +62,58 @@
 
 https://blog.csdn.net/chenweijiSun/article/details/104814564
 
+### 源码解读
+
+参考地址：https://www.jianshu.com/p/922125d40eb4
+
+```
+public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
+		
+		//调用了父类的构造方法，初始化了一个IOC容器：DefaultListableBeanFactory ，并把默认的spring内置的bean注册到容器中
+		this();
+		
+		//将指定的配置类注册到容器中
+		register(annotatedClasses);
+		
+		//扫描工程中的bean对象，注册到容器中，执行BeanFactoryPostProcess的实现类 --> 实例化 --> 执行BeanPostProcess的实现类
+		refresh();
+	}
+```
+
+
+
+```
+### Bean定义：
+DefaultListableBeanFactory  IOC容器
+	实现了BeanDefinitionRegistry接口
+DefaultListableBeanFactory.beanDefinitionMap
+BeanDefinition
+
+
+### Bean定义修改：
+BeanFactoryPostProcess   开发人员修改BeanDefinition
+
+BeanDefinitionRegistryPostProcessor 继承了BeanFactoryPostProcess接口，注册bean定义到容器中
+
+ConfigurationClassPostProcessor 实现了BeanDefinitionRegistryPostProcessor接口，PriorityOrdered接口，用于框架实现BeanDefinition的定义
+
+BeanPostProcessor  修改bean实例
+
+
+### 修改实例
+ImportBeanDefinitionRegistrar  传入的参数，DefaultListableBeanFactory，从而修改其中的map中的bean定义
+```
 
 
 
 
 
+### BeanFactoryPostProcess
 
-## 
+![202006162019](./spring.assets/202006162019.png)
+
+
+
+## ApplicationEvent
+
+参考：https://www.jianshu.com/p/ef2cee8c5dd1
