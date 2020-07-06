@@ -6,6 +6,8 @@
 
 ### autoconfigure原理
 
+## SPI机制
+
 ## HandWritten-SpringBootStarter
 
 

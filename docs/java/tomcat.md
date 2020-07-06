@@ -779,6 +779,8 @@ user
 
 ## Http长连接
 
+关键类：
+
 ```
 # tomcat保持长连接的伪代码如下：
 boolean keepalive = true
