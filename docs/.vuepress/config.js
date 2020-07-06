@@ -53,9 +53,9 @@ module.exports = {
 			  { text: '数据库', link: '/database/mysql' },
 			  { text: '开发工具', link: '/developTools/idea' },
 			  { text: '项目构建', link: '/buildProject/' },
-			  { text: 'Go语言', link: '/go/go' },
 			  { text: '正则表达式', link: '/regex/regex' },
-			  
+			  { text: 'Go语言', link: '/go/go' },
+			  { text: 'python语言', link: '/python/python' },
 			  
             ]
 		  }
