@@ -439,8 +439,6 @@ public class SellingRedissonLockTicketService implements Runnable {
 参考：https://blog.csdn.net/crazymakercircle/article/details/85956246
 
 ```java
-package com.wykd.jiazhuang.lock;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -456,101 +454,170 @@ import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.wykd.jiazhuang.util.ZookeeperClient;
 
 @Component
 public class ZookeeperLock implements DistributeLock {
 
-	private final String basePath = "/zookeeper";
-	private String currZkNode = "";
-	
-	@Autowired
-	private ZooKeeper zookeeper;
-	
-	@Autowired
-	private ZookeeperClient zookeeperClient;
-	
-	
-	@Override
-	public boolean tryLock(String key, String value, int expireTime) {
-		try {
-			//1.创建临时顺序节点
-			String node = basePath + "/lock";
-			//获取根节点状态
-	        Stat stat = zookeeper.exists(node, false);
-	        //如果根节点不存在，则创建根节点，根节点类型为永久节点
-	        if (stat == null) {
-				zookeeper.create(node, "zkLock".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-	        }
-	        
-	        currZkNode = zookeeper.create(node+"/lock_", "zkLock".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
-	        
-	        List<String> zkLocks = zookeeper.getChildren(node, false);
-	        Collections.sort(zkLocks);
-			if (zkLocks != null && zkLocks.size() > 0 && currZkNode.equalsIgnoreCase(node + "/" + zkLocks.get(0))) {
-	        	// 最小节点与当前节点一致，说明获取到锁
-	        	return true;
-	        }else {
-	        	final CountDownLatch latch = new CountDownLatch(1);
-	        	
-	        	//等待锁
-	        	int index = zkLocks.indexOf(currZkNode.substring(node.length()+1));
-	        	zookeeper.exists(node+"/"+zkLocks.get(index),new Watcher() {
+    private final String rootNode = "/zklock";
+    private ThreadLocal<String> currZkNode = new ThreadLocal<>();  //非常关键，若不设置为ThreadLocal，会有线程安全问题
 
-					@Override
-					public void process(WatchedEvent event) {
-						if(Event.EventType.NodeDeleted.equals(event.getType())) {
-							//监听前一节点的删除事件
-							latch.countDown();
-						}
-					}
-	        		
-	        	});
-	        	 latch.await();
-	        }
-	        
-	       
-		
-		//2.查询出所有子节点，并监听前一个节点是否存在
-		
-		} catch (KeeperException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
-	}
+    @Autowired
+    private ZooKeeper zookeeper;
 
-	@Override
-	public void lock(String key, String value) {
-		tryLock(value, value, 0);
-	}
 
-	@Override
-	public boolean unlock(String key, String value) {
-		
-		
-		try {
-			zookeeper.delete(currZkNode, -1 );
-			currZkNode = "";
-			zookeeper.close();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (KeeperException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
-	}
+    @Override
+    public boolean tryLock() {
+        try {
+            /** 1.创建根节点 */
+            //获取根节点状态
+            Stat stat = zookeeper.exists(rootNode, false);
+            //如果根节点不存在，则创建根节点，根节点类型为永久节点
+            if (stat == null) {
+                System.out.println("创建根节点");
+                zookeeper.create(rootNode, "zkLock".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            }
 
+            /** 2.创建一个临时序列节点 , 非常关键：即使不解锁，当线程结束，该节点也会随着线程结束而消失*/
+            currZkNode.set(zookeeper.create(rootNode + "/lock_", "zkLock".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL));
+
+//            System.out.println(Thread.currentThread().getName()+"创建节点："+currZkNode.get());
+
+            //获取所有子节点
+            List<String> childNodes = zookeeper.getChildren(rootNode, false);
+            Collections.sort(childNodes);  //升序排列：lock_0000000001  lock_0000000002  ；  childNodes.get(0) 取最小的节点
+
+//            System.out.println(Thread.currentThread().getName()+"最小节点==>"+rootNode + "/" + childNodes.get(0));
+//            System.out.println(Thread.currentThread().getName()+"当前节点==>"+currZkNode.get());
+//            System.out.println(Thread.currentThread().getName()+"是否与当前节点相同==>"+currZkNode.get().equalsIgnoreCase(rootNode + "/" + childNodes.get(0)));
+
+            if (childNodes != null
+                    && childNodes.size() > 0
+                    && currZkNode.get().equalsIgnoreCase(rootNode + "/" + childNodes.get(0))) {
+                /** 3.1 最小节点与当前节点一致，说明获取到锁 */
+//                System.out.println(Thread.currentThread().getName()+"拿到锁");
+                return true;
+            } else {
+
+                /** 3.2 等待锁，监听前一个节点的删除事件 */
+
+                String watchNode = null;  //需要监听的节点
+                //反向遍历子节点，获取前一个节点
+                for (int i = childNodes.size() - 1; i >= 0; i--) {
+                    if (childNodes.get(i).compareTo(currZkNode.get().substring(currZkNode.get().lastIndexOf("/") + 1)) < 0) {
+                        watchNode = childNodes.get(i);
+                        break;
+                    }
+                }
+//                System.out.println(Thread.currentThread().getName()+"前一节点==>"+watchNode);
+
+                final CountDownLatch latch = new CountDownLatch(1);
+
+                zookeeper.exists(rootNode + "/" + watchNode, new Watcher() {
+                    @Override
+                    public void process(WatchedEvent event) {
+                        if (Event.EventType.NodeDeleted.equals(event.getType())) {
+                            //监听前一节点的删除事件
+                            System.out.println(Thread.currentThread().getName() + "唤醒锁");
+                            latch.countDown();
+                        }
+                    }
+
+                });
+                System.out.println(Thread.currentThread().getName() + "等待锁");
+                latch.await();
+                System.out.println(Thread.currentThread().getName() + "被唤醒");
+            }
+
+
+
+        } catch (KeeperException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public void lock() {
+        tryLock();
+    }
+
+    @Override
+    public boolean unlock() {
+
+
+        try {
+            System.out.println(Thread.currentThread().getName()+"删除节点===>"+currZkNode.get());
+            zookeeper.delete(currZkNode.get(), -1);
+            currZkNode.remove();
+//            zookeeper.close();   //非常关键，不可close ,会影响zookeeper的下次调用delete
+        } catch (InterruptedException | KeeperException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 
 }
 
+
 ```
+
+
+
+```java
+
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooKeeper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.concurrent.CountDownLatch;
+
+@Configuration
+public class ZkConfig {
+
+    @Value("${zookeeper.address}")
+    private String connectString;
+
+    @Value("${zookeeper.timeout}")
+    private int timeout;
+
+
+    @Bean(name = "zkClient")
+    public ZooKeeper zkClient() {
+        ZooKeeper zooKeeper = null;
+        try {
+            final CountDownLatch countDownLatch = new CountDownLatch(1);
+            //连接成功后，会回调watcher监听，此连接操作是异步的，执行完new语句后，直接调用后续代码
+            //  可指定多台服务地址 127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183
+            zooKeeper = new ZooKeeper(connectString, timeout, new Watcher() {
+                @Override
+                public void process(WatchedEvent event) {
+                    if (Watcher.Event.KeeperState.SyncConnected == event.getState()) {
+                        //如果收到了服务端的响应事件,连接成功
+                        countDownLatch.countDown();
+                    }
+                }
+            });
+            countDownLatch.await();
+
+        } catch (Exception e) {
+        }
+        return zooKeeper;
+    }
+
+
+}
+```
+
+
 
 
 
@@ -616,7 +683,7 @@ public class SellingZkLockTicketService implements Runnable {
 
 
 
-```
+```java
 /**
      * @func 测试zookeeper分布式锁
      * @return
@@ -637,9 +704,13 @@ public class SellingZkLockTicketService implements Runnable {
 
 参考：https://blog.csdn.net/w8y56f/article/details/89554060
 
-> 1.在一个线程过程中，可以反复获得ReentrantLock锁。
+> 1.在一个线程执行过程中，可以反复获得ReentrantLock锁。
 >
 > 2.可重入锁，加锁的次数，与解锁的次数必须保持一致。否则其他线程获取不到锁。
+
+测试类:
+
+> 如下代码，因为第一个线程的加锁，解锁次数不一致，导致第二个线程永远拿不到锁，造成死锁。
 
 ```java
 import java.util.Random;
@@ -711,4 +782,8 @@ public class ReentrantTest {
 
 ```
 
+## Lock与Synchronized的区别
 
+> 两者都是可重入锁
+
+> synchronized在发生异常时，会自动释放线程占有的锁；Lock在发生异常时，需要在finally主动通过unLock()去释放锁
