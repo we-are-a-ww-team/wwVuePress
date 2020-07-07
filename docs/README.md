@@ -14,3 +14,11 @@ features:
 footer: © 2019 - 2020   |  wykd Technology Co. Ltd.             ICP备案证书号：<a rel="nofollow" href="http://www.beian.miit.gov.cn">粤ICP备20046866号</a>
 ---
 
+
+
+[jenkins](120.24.170.89:8080)  
+
+[halo](120.24.87.121:8090/admin/index.html#/dashboard)  admin 12345678
+
+[rocketmq_console](120.24.87.121:8099/#/)
+
