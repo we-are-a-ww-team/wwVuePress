@@ -12,6 +12,7 @@ module.exports = {
 	base:'/',
     ga: '',
     evergreen: true,
+	plugins: ["vuepress-plugin-@vuepress/plugin-blog"],
 	theme: 'reco',
 	themeConfig: {
 		
@@ -60,7 +61,8 @@ module.exports = {
 			  { text: 'python语言', link: '/python/python' },
 			  
             ]
-		  }
+		  },
+		   
         ],
 		sidebarDepth: 2,
 		sidebar: {
@@ -115,6 +117,7 @@ module.exports = {
 				'sentinel',
 				'seata'
 			],'/go/':[
+				'',
 				'go'
 			],'/java/':[
 				'java',
@@ -146,6 +149,16 @@ module.exports = {
 			],'/sourceCode/':[
 				''
 			]
+		},
+		blogConfig: {
+		  category: {
+			location: 2,     // 在导航栏菜单中所占的位置，默认2
+			text: 'Category' // 默认文案 “分类”
+		  },
+		  tag: {
+			location: 3,     // 在导航栏菜单中所占的位置，默认3
+			text: 'Tag'      // 默认文案 “标签”
+		  }
 		}
     }
 }

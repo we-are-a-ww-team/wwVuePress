@@ -1,3 +1,28 @@
-# go语言
+---
+title: 烤鸭的做法
+date: 2019-08-08
+sidebar: 'auto'
+categories:
+ - 烹饪
+ - 爱好
+tags:
+ - 烤
+ - 鸭子
+publish: true
+---
 
-既有C语言的运行速度，也有Python的开发简单。
+
+
+
+
+# GO
+
+
+
+:tada: :100:
+
+
+
+::: tip
+这是一个提示
+:::
