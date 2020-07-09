@@ -42,7 +42,7 @@ world
 
 
 
-## 客户端：zookeeper
+## 客户端1：zookeeper
 
 引入jar包
 
@@ -133,3 +133,217 @@ public class TestZookeeperClient {
 
 
 
+## 客户端2：curator
+
+```xml
+<dependency>
+    <groupId>org.apache.zookeeper</groupId>
+    <artifactId>zookeeper</artifactId>
+    <version>3.4.10</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.curator</groupId>
+    <artifactId>curator-framework</artifactId>
+    <version>2.12.0</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.curator</groupId>
+    <artifactId>curator-recipes</artifactId>
+    <version>2.12.0</version>
+</dependency>
+```
+
+
+
+```properties
+curator.connectString=192.168.113.129:2181
+curator.connectionTimeoutMs=5000
+curator.elapsedTimeMs=5000
+curator.retryCount=5
+curator.sessionTimeoutMs=60000
+wang.name=laowang
+```
+
+
+
+```java
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.RetryNTimes;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class CuratorConfiguration {
+
+    @Value("${curator.retryCount}")
+    private int retryCount;
+
+    @Value("${curator.elapsedTimeMs}")
+    private int elapsedTimeMs;
+
+    @Value("${curator.connectString}")
+    private String connectString;
+
+    @Value("${curator.sessionTimeoutMs}")
+    private int sessionTimeoutMs;
+
+    @Value("${curator.connectionTimeoutMs}")
+    private int connectionTimeoutMs;
+
+    @Bean(initMethod = "start")
+    public CuratorFramework curatorFramework() {
+        return CuratorFrameworkFactory.newClient(
+                connectString,
+                sessionTimeoutMs,
+                connectionTimeoutMs,
+                new RetryNTimes(retryCount, elapsedTimeMs));
+    }
+}
+
+```
+
+
+
+```java
+@RestController
+public class CuratorController {
+
+
+    @Autowired
+    private Environment environment;
+
+    @GetMapping("/getConfig")
+    public String getConfig(){
+        return environment.getProperty("wang.name") ;
+    }
+
+
+}
+```
+
+
+
+```java
+import com.alibaba.fastjson.JSON;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.env.OriginTrackedMapPropertySource;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 功能：
+ * Created by [Alex]
+ * 2020/7/9 10:23
+ */
+@Component
+public class CuratorUtils {
+
+    @Autowired
+    private CuratorFramework client;
+
+    private static String path = "/disconfig";
+
+    @PostConstruct
+    public void init(){
+
+//        client = CuratorFrameworkFactory.builder().connectString("192.168.113.129:2181")
+//                .sessionTimeoutMs(5000)
+//                .retryPolicy(new ExponentialBackoffRetry(1000,3))
+//                .build();
+
+        try {
+            updateConfig();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void updateConfig() throws Exception {
+
+        Stat stat = client.checkExists().forPath(path);
+
+        if(stat == null){
+            System.out.println("若根目录不存在，则创建永久节点");
+            //若根目录不存在，则创建永久节点
+            client.create().creatingParentContainersIfNeeded().withMode(CreateMode.PERSISTENT)
+                    .forPath(path,"zookeeper config".getBytes());
+        }else{
+
+            //若存在，则加载该节点的配置信息，并动态加载到Spring容器中
+            addZkChildNode2Spring();
+
+
+        }
+
+    }
+
+
+    @Autowired
+    private ConfigurableApplicationContext applicationContext;
+
+    private static String zkPropertyName = "zkPropertyName";
+
+    private void addZkChildNode2Spring() throws Exception {
+
+        //一个个加载到配置中
+        MutablePropertySources propertySources = applicationContext.getEnvironment().getPropertySources();
+
+        boolean exited = false;
+        for (PropertySource propertySource : propertySources) {
+            if(propertySource.getName().equalsIgnoreCase(zkPropertyName)){
+                exited = true;
+            }
+        }
+
+        if(!exited){
+            //不存在，则创建zkPropertyName
+
+            ConcurrentHashMap map = new ConcurrentHashMap();
+
+            //先读取zk的子节点
+            List childNodes = client.getChildren().forPath(path);
+            System.out.println("子节点："+JSON.toJSONString(childNodes));
+            for (int i = 0; i <childNodes.size(); i++) {
+                String configKey = (String) childNodes.get(i);
+                String configValue = new String(client.getData().forPath(path + "/" + configKey));
+                System.out.println(configKey + "=====" + configValue);
+                map.put(configKey,configValue);
+            }
+
+            propertySources.addLast(new OriginTrackedMapPropertySource(zkPropertyName,map));
+        }else{
+            //存在，则更改
+            PropertySource propertySource = propertySources.get(zkPropertyName);
+            ConcurrentHashMap map = (ConcurrentHashMap) propertySource.getSource();
+
+            //先读取zk的子节点
+            List childNodes = client.getChildren().forPath(path);
+            System.out.println("子节点："+JSON.toJSONString(childNodes));
+            for (int i = 0; i <childNodes.size(); i++) {
+                String configKey = (String) childNodes.get(i);
+                String configValue = new String(client.getData().forPath(path + "/" + configKey));
+                System.out.println(configKey + "=====" + configValue);
+                map.put(configKey,configValue);
+            }
+
+        }
+
+
+    }
+
+}
+
+```
