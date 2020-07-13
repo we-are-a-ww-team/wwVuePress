@@ -68,14 +68,14 @@ https://blog.csdn.net/chenweijiSun/article/details/104814564
 
 **在源码中创建测试模块**
 
-```
+```groovy
 # 创建一个gradle模块，build.gradle添加下面依赖
 compile(project(":spring-context"))
 ```
 
 配置类：
 
-```
+```java
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -87,7 +87,7 @@ public class AppConfig {
 
 Demo类：
 
-```
+```java
 
 import org.springframework.stereotype.Component;
 @Component
@@ -102,7 +102,7 @@ public class Demo {
 
 测试类：
 
-```
+```java
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
