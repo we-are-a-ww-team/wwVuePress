@@ -129,7 +129,17 @@ hello , 恭喜 , Spring源码5.0.2版本第一次构建成功！
 
 ### 源码解读
 
-参考地址：https://www.jianshu.com/p/922125d40eb4
+参考地址1：https://www.jianshu.com/p/922125d40eb4
+
+参考地址2：https://blog.csdn.net/nuomizhende45/article/details/81158383
+
+### ApplicationContext
+
+![1](./spring.assets/1.png)
+
+
+
+### AnnotationConfigApplicationContext
 
 ```
 public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
@@ -145,39 +155,31 @@ public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
 	}
 ```
 
+### DefaultListableBeanFactory，存放bean定义
+
+![2](./spring.assets/2.png)
+
 
 
 ```
-### Bean定义：
-DefaultListableBeanFactory  IOC容器
-	实现了BeanDefinitionRegistry接口
-DefaultListableBeanFactory.beanDefinitionMap
-BeanDefinition
+### IOC容器，以及Bean定义：
+DefaultListableBeanFactory   IOC容器;（实现了BeanDefinitionRegistry接口）
+DefaultListableBeanFactory.beanDefinitionMap   存放BeanDefinition
+BeanDefinition  Bean定义
 
 
-### Bean定义修改：
-BeanFactoryPostProcess   开发人员修改BeanDefinition
-
-BeanDefinitionRegistryPostProcessor 继承了BeanFactoryPostProcess接口，注册bean定义到容器中
-
-ConfigurationClassPostProcessor 实现了BeanDefinitionRegistryPostProcessor接口，PriorityOrdered接口，用于框架实现BeanDefinition的定义
-
-BeanPostProcessor  修改bean实例
-
-
-### 修改实例
-ImportBeanDefinitionRegistrar  传入的参数，DefaultListableBeanFactory，从而修改其中的map中的bean定义
 ```
 
 
 
 
 
-### BeanFactoryPostProcess
+### 单例缓存池，存放Bean实例
 
-![202006162019](./spring.assets/202006162019.png)
-
-### 单例线程池
+```java
+# 存放Bean实例 DefaultSingletonBeanRegistry
+private final Map<String, Object> singletonObjects = new ConcurrentHashMap(256);
+```
 
 ![1593251280178](./spring.assets/1593251280178.png)
 
@@ -329,7 +331,27 @@ if (mbd.isSingleton()) {
 	}
 ```
 
+### BeanFactoryPostProcess
 
+
+
+![202006162019](./spring.assets/202006162019.png)
+
+```
+### Bean定义修改：
+BeanFactoryPostProcess   开发人员修改BeanDefinition
+
+BeanDefinitionRegistryPostProcessor 继承了BeanFactoryPostProcess接口，注册bean定义到容器中
+
+ConfigurationClassPostProcessor 实现了BeanDefinitionRegistryPostProcessor接口，PriorityOrdered接口，用于框架实现BeanDefinition的定义
+
+
+### 修改Bean实例
+BeanPostProcessor  修改bean实例
+
+### Import
+ImportBeanDefinitionRegistrar  传入的参数，DefaultListableBeanFactory，从而修改其中的map中的bean定义
+```
 
 
 

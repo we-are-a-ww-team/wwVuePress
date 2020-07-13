@@ -153,7 +153,7 @@ public class TestZookeeperClient {
 </dependency>
 ```
 
-
+application.properties配置
 
 ```properties
 curator.connectString=192.168.113.129:2181
@@ -223,7 +223,7 @@ public class CuratorController {
 }
 ```
 
-
+从zookeeper加载配置，存放到本地缓存中
 
 ```java
 import com.alibaba.fastjson.JSON;
@@ -347,3 +347,5 @@ public class CuratorUtils {
 }
 
 ```
+
+![20200713](./zookeeper.assets/20200713.png)
