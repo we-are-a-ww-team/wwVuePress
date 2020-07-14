@@ -133,6 +133,22 @@ hello , 恭喜 , Spring源码5.0.2版本第一次构建成功！
 
 参考地址2：https://blog.csdn.net/nuomizhende45/article/details/81158383
 
+参考地址3：https://blog.csdn.net/java_lyvee
+
+### Bean实例过程
+
+::: 
+
+1.先扫描文件夹，扫描加了@Component注解的文件
+
+2.创建BeanDefinition，将扫描的类属性设置到BeanDefinition中，放入一个Ioc容器的map属性中
+
+[DefaultListableBeanFactory.beanDefinitionMap]
+
+3.遍历BeanDefinitionMap，逐个实例化，并放入单例池中（另一个map）。[DefaultSingletonBeanRegistry.singletonObjects]
+
+:::
+
 ### ApplicationContext
 
 ![1](./spring.assets/1.png)
