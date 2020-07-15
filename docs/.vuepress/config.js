@@ -15,7 +15,7 @@ module.exports = {
 	plugins: ["vuepress-plugin-@vuepress/plugin-blog"],
 	theme: 'reco',
 	themeConfig: {
-		
+		author: 'wwei',
         nav: [
           { text: 'Home', link: '/' },
 		  { text: '前端技术', 
@@ -117,7 +117,6 @@ module.exports = {
 				'sentinel',
 				'seata'
 			],'/go/':[
-				'',
 				'go'
 			],'/java/':[
 				'java',
