@@ -26,3 +26,14 @@ publish: true
 ::: tip
 这是一个提示
 :::
+
+::: tip
+这是一个提示
+:::
+
+::: tip
+AnnotationConfigApplicationContext 
+:::
+
+
+

@@ -137,13 +137,17 @@ hello , 恭喜 , Spring源码5.0.2版本第一次构建成功！
 
 ### Bean实例过程
 
-:::1.先扫描文件夹，扫描加了@Component注解的文件
+::: tip
+
+1.先扫描文件夹，扫描加了@Component注解的文件
 
 2.创建BeanDefinition，将扫描的类属性设置到BeanDefinition中，放入一个Ioc容器的map属性中
 
 [DefaultListableBeanFactory.beanDefinitionMap]
 
-3.遍历BeanDefinitionMap，逐个实例化，并放入单例池中（另一个map）。[DefaultSingletonBeanRegistry.singletonObjects]:::
+3.遍历BeanDefinitionMap，逐个实例化，并放入单例池中（另一个map）。[DefaultSingletonBeanRegistry.singletonObjects]
+
+:::
 
 ### ApplicationContext
 
@@ -151,19 +155,128 @@ hello , 恭喜 , Spring源码5.0.2版本第一次构建成功！
 
 
 
-### AnnotationConfigApplicationContext
+::: tip 
+
+AnnotationConfigApplicationContext 
+
+:::
 
 ```
 public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
-		
 		//调用了父类的构造方法，初始化了一个IOC容器：DefaultListableBeanFactory ，并把默认的spring内置的bean注册到容器中
 		this();
-		
-		//将指定的配置类注册到容器中
+		//将指定的配置类注册到容器中【真的就只注册了 配置类】
 		register(annotatedClasses);
-		
 		//扫描工程中的bean对象，注册到容器中，执行BeanFactoryPostProcess的实现类 --> 实例化 --> 执行BeanPostProcess的实现类
 		refresh();
+	}
+```
+
+
+
+::: tip
+
+AbstractApplicationContext 
+
+:::
+
+```
+@Override
+	public void refresh() throws BeansException, IllegalStateException {
+		synchronized (this.startupShutdownMonitor) {
+			// Prepare this context for refreshing.
+			//调用容器准备刷新的方法，获取容器的当时时间，同时给容器设置同步标识
+			prepareRefresh();
+
+			// Tell the subclass to refresh the internal bean factory.
+			//告诉子类启动refreshBeanFactory()方法，Bean定义资源文件的载入从
+			//子类的refreshBeanFactory()方法启动
+			/**
+			 * 取出IOC容器
+			 * 若是xml方式，还会扫描xml配置，放入map中
+			 */
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+			// Prepare the bean factory for use in this context.
+			//为BeanFactory配置容器特性，例如类加载器、事件处理器等
+			prepareBeanFactory(beanFactory);
+
+			try {
+				// Allows post-processing of the bean factory in context subclasses.
+				//为容器的某些子类指定特殊的BeanPost事件处理器
+				postProcessBeanFactory(beanFactory);
+
+				/**
+				 * 1.扫描
+				 * 2.遍历所有BeanFactoryPostProcess的实现类，并分别执行postProcessBeanFactory方法。
+				 * 		1)最先执行默认：ConfigurationClassPostProcessor（实现了PriorityOrdered，BeanDefinitionRegistryPostProcessor接口）
+				 * 			完成注解的所有BeanDefinition的定义，并添加到IOC容器中
+				 * 		2)然后执行开发人员自定义的BeanFactoryPostProcess的实现类
+				 */
+				invokeBeanFactoryPostProcessors(beanFactory);
+
+				// Register bean processors that intercept bean creation.
+				//为BeanFactory注册BeanPost事件处理器.
+				//BeanPostProcessor是Bean后置处理器，用于监听容器触发的事件
+				/**
+				 * 注册 BeanPostProcessor 的实现类
+				 */
+				registerBeanPostProcessors(beanFactory);
+
+				// Initialize message source for this context.
+				//初始化信息源，和国际化相关.
+				initMessageSource();
+
+				// Initialize event multicaster for this context.
+				//初始化容器事件传播器.
+				initApplicationEventMulticaster();
+
+				// Initialize other special beans in specific context subclasses.
+				//调用子类的某些特殊Bean初始化方法
+				onRefresh();
+
+				// Check for listener beans and register them.
+				//为事件传播器注册事件监听器, 监听器需要实现 ApplicationListener 接口
+				registerListeners();
+
+				// Instantiate all remaining (non-lazy-init) singletons.
+				/**
+				 * 初始化所有的 singleton beans【非常关键】
+				 * getBean -> doCreateBean -> 根据构造方法进行实例化
+				 * bean属性注入
+				 * 执行后置处理器BeanPostProcessor的方法
+				 */
+				finishBeanFactoryInitialization(beanFactory);
+
+				// Last step: publish corresponding event.
+				//初始化容器的生命周期事件处理器，并发布容器的生命周期事件
+				finishRefresh();
+			}
+
+			catch (BeansException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Exception encountered during context initialization - " +
+							"cancelling refresh attempt: " + ex);
+				}
+
+				// Destroy already created singletons to avoid dangling resources.
+				//销毁已创建的Bean
+				destroyBeans();
+
+				// Reset 'active' flag.
+				//取消refresh操作，重置容器的同步标识.
+				cancelRefresh(ex);
+
+				// Propagate exception to caller.
+				throw ex;
+			}
+
+			finally {
+				// Reset common introspection caches in Spring's core, since we
+				// might not ever need metadata for singleton beans anymore...
+				resetCommonCaches();
+			}
+		}
 	}
 ```
 
