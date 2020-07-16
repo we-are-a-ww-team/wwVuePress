@@ -135,7 +135,7 @@ hello , 恭喜 , Spring源码5.0.2版本第一次构建成功！
 
 参考地址3：https://blog.csdn.net/java_lyvee
 
-### Bean实例过程
+
 
 ::: tip
 
@@ -149,26 +149,43 @@ hello , 恭喜 , Spring源码5.0.2版本第一次构建成功！
 
 :::
 
+
+
+### BeanFactory
+
+![2](./spring.assets/2.png)
+
+
+
 ### ApplicationContext
 
 ![1](./spring.assets/1.png)
+
+### IOC容器
 
 
 
 ::: tip 
 
+DefaultListableBeanFactory   IOC容器;（实现了BeanDefinitionRegistry接口）
+DefaultListableBeanFactory.beanDefinitionMap   存放BeanDefinition
+
+:::
+
+::: tip
+
 AnnotationConfigApplicationContext 
 
 :::
 
-```
+```java
 public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
 		//调用了父类的构造方法，初始化了一个IOC容器：DefaultListableBeanFactory ，并把默认的spring内置的bean注册到容器中
 		this();
 		//将指定的配置类注册到容器中【真的就只注册了 配置类】
 		register(annotatedClasses);
 		//扫描工程中的bean对象，注册到容器中，执行BeanFactoryPostProcess的实现类 --> 实例化 --> 执行BeanPostProcess的实现类
-		refresh();
+		refresh();  //调用父类的AbstractApplicationContext 的refresh方法
 	}
 ```
 
@@ -180,7 +197,7 @@ AbstractApplicationContext
 
 :::
 
-```
+```java
 @Override
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
@@ -280,41 +297,41 @@ AbstractApplicationContext
 	}
 ```
 
-### DefaultListableBeanFactory，存放bean定义
-
-![2](./spring.assets/2.png)
-
-
-
-```
-### IOC容器，以及Bean定义：
-DefaultListableBeanFactory   IOC容器;（实现了BeanDefinitionRegistry接口）
-DefaultListableBeanFactory.beanDefinitionMap   存放BeanDefinition
-BeanDefinition  Bean定义
-
-
-```
 
 
 
 
+### 单例池
 
-### 单例缓存池，存放Bean实例
+::: tip
 
-```java
-# 存放Bean实例 DefaultSingletonBeanRegistry
+存放Bean实例 DefaultSingletonBeanRegistry
+
 private final Map<String, Object> singletonObjects = new ConcurrentHashMap(256);
-```
+
+:::
 
 ![1593251280178](./spring.assets/1593251280178.png)
 
-![1593251201945](./spring.assets/1593251201945.png)
+::: tip
+
+refresh() --> finishBeanFactoryInitialization() --> beanFactory.preInstantiateSingletons(); 
+
+--> getBean()   --> doGetBean关键代码1 
+
+-->  getSingleton【singletonObjects.get(beanName)】 ,第一次自然而言取不到单例实例的
+
+:::
 
 ![1593251339219](./spring.assets/1593251339219.png)
 
+::: tip
 
+doGetBean的关键代码2
 
-doGetBean的关键代码
+-->   if(mbd.isSingleton() ) --->   getSingleton(String beanName, ObjectFactory<?> singletonFactory)  -->  
+
+:::
 
 ```java
 // Create bean instance.
@@ -338,6 +355,14 @@ if (mbd.isSingleton()) {
 ```
 
 
+
+::: tip
+
+createBean --> doCreateBean
+
+真正创建Bean的方法，返回Bean实例
+
+:::
 
 ```java
 //真正创建Bean的方法
@@ -455,6 +480,22 @@ if (mbd.isSingleton()) {
 		return exposedObject;
 	}
 ```
+
+::: tip
+
+createBean创建实例后，将实例写入单例池
+
+----> 回到doCreateBean ---> getSingleton(String beanName, ObjectFactory<?> singletonFactory)   
+
+---> addSingleton  将实例写入单例缓存池--->  【singletonObjects.put(beanName, singletonObject);】
+
+:::
+
+![1594909532495](./spring.assets/1594909532495.png)
+
+![1593251201945](./spring.assets/1593251201945.png)
+
+
 
 ### BeanFactoryPostProcess
 
