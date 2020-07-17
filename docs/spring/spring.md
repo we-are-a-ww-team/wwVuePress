@@ -66,7 +66,7 @@
 
 https://blog.csdn.net/chenweijiSun/article/details/104814564
 
-**在源码中创建测试模块**
+#### 在源码中创建测试模块
 
 ```groovy
 # 创建一个gradle模块，build.gradle添加下面依赖
@@ -109,8 +109,12 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 public class Test {
 
 	public static void main(String[] args) {
+        //初始化IOC容器，创建BeanDefinition -> map -> 遍历map --> getBean --> getSingleton不存在实例
+		// --> createBean 创建Bean实例 --> addSingleton 把bean放入单例池
 		AnnotationConfigApplicationContext ctx =
 				new AnnotationConfigApplicationContext(AppConfig.class);
+        
+        //从单例池取出Bean实例
 		Demo demo = (Demo) ctx.getBean("demo");
 		demo.test();
 
@@ -186,6 +190,34 @@ public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
 		register(annotatedClasses);
 		//扫描工程中的bean对象，注册到容器中，执行BeanFactoryPostProcess的实现类 --> 实例化 --> 执行BeanPostProcess的实现类
 		refresh();  //调用父类的AbstractApplicationContext 的refresh方法
+	}
+```
+
+无参构造函数
+
+```java
+/**
+	 * Create a new AnnotationConfigApplicationContext that needs to be populated
+	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
+	 */
+	//默认构造函数，初始化一个空容器，容器不包含任何 Bean 信息，需要在稍后通过调用其register()
+	//方法注册配置类，并调用refresh()方法刷新容器，触发容器对注解Bean的载入、解析和注册过程
+	public AnnotationConfigApplicationContext() {
+
+		// 1.调用了父类的无参构造方法：new GenericApplicationContext() ，创建了一个空的IOC容器，DefaultListableBeanFactory
+
+		/**
+		 * 2.注册了spring的内核关键bean
+		 * 		继承的GenericApplicationContext实现了BeanDefinitionRegistry接口，把this作为参数传递
+		 * 		调用GenericApplicationContext的registerBeanDefinition方法
+		 * 		从GenericApplicationContext获取beanFactory（DefaultListableBeanFactory）;
+		 * 		将BeanDefinition，写入到DefaultListableBeanFactory的beanDefinitionMap中
+		 */
+		this.reader = new AnnotatedBeanDefinitionReader(this);
+		/**
+		 * 3.创建一个扫描器，添加过滤规则（扫描带@Component的）
+		 */
+		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 ```
 
@@ -520,6 +552,200 @@ ImportBeanDefinitionRegistrar  传入的参数，DefaultListableBeanFactory，�
 ```
 
 
+
+#### 代码示例
+
+```java
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.stereotype.Component;
+
+/**
+ * 功能：
+ * Created by [Alex]
+ * 2020/6/17 14:35
+ */
+@Component
+public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        GenericBeanDefinition beanDefinition = (GenericBeanDefinition) beanFactory.getBeanDefinition("userDao");
+        beanDefinition.setBeanClass(UserDaoImpl2.class);
+        System.out.println("========MyBeanFactoryPostProcessor.postProcessBeanFactory=========");
+        System.out.println("22222222222222222");
+    }
+}
+```
+
+
+
+```java
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.stereotype.Component;
+
+/**
+ * 功能：
+ * Created by [Alex]
+ * 2020/7/16 16:10
+ */
+@Component
+public class MyBeanFactoryPostProcessor2 implements BeanDefinitionRegistryPostProcessor {
+
+
+    @Override
+    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+
+        BeanDefinition annotationProcessor = BeanDefinitionBuilder.genericBeanDefinition(UserDaoImpl3.class).getBeanDefinition();
+        registry.registerBeanDefinition("userDaoImpl3", annotationProcessor);
+
+        System.out.println("1111111111111111");
+    }
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+
+    }
+}
+
+```
+
+
+
+
+
+```java
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.stereotype.Component;
+
+/**
+ * 功能：
+ * Created by [Alex]
+ * 2020/6/17 15:30
+ */
+@Component
+public class MyBeanPostProcessor implements BeanPostProcessor {
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        System.out.println(beanName+"======MyBeanPostProcessor.postProcessBeforeInitialization======");
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        System.out.println(beanName+"======MyBeanPostProcessor.postProcessAfterInitialization======");
+        return bean;
+    }
+}
+
+```
+
+
+
+
+
+```java
+import com.alibaba.fastjson.JSON;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+/**
+ * 功能：
+ * Created by [Alex]
+ * 2020/6/17 14:54
+ */
+public class TestBeanDefinition {
+
+    public static void main(String[] args) {
+
+
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("com.wykd.bean.bean.definition");
+
+        UserDao dao = (UserDao) ctx.getBean("userDao");
+        System.out.println(dao.test());
+
+        System.out.println("getBeanDefinitionNames"+JSON.toJSONString(ctx.getBeanDefinitionNames()));
+
+
+        UserDao dao2 = (UserDao) ctx.getBean("userDaoImpl3");
+        System.out.println(dao2.test());
+    }
+
+
+}
+```
+
+
+
+
+
+```java
+public interface UserDao {
+    String test();
+}
+
+@Component("userDao")
+public class UserDaoImpl implements UserDao{
+    public String test(){
+        return "hello UserDaoImpl";
+    }
+}
+
+public class UserDaoImpl2 implements UserDao {
+    public String test(){
+        return "hello UserDaoImpl2";
+    }
+}
+
+
+public class UserDaoImpl3 implements UserDao {
+    public String test(){
+        return "hello UserDaoImpl3";
+    }
+}
+
+```
+
+
+
+
+```
+1111111111111111
+========MyBeanFactoryPostProcessor.postProcessBeanFactory=========
+22222222222222222
+userDao======MyBeanPostProcessor.postProcessBeforeInitialization======
+userDao======MyBeanPostProcessor.postProcessAfterInitialization======
+userDaoImpl3======MyBeanPostProcessor.postProcessBeforeInitialization======
+userDaoImpl3======MyBeanPostProcessor.postProcessAfterInitialization======
+hello UserDaoImpl2
+hello UserDaoImpl3
+
+```
+
+BeanDefinition的集合
+
+```
+[
+	"org.springframework.context.annotation.internalConfigurationAnnotationProcessor",
+	"org.springframework.context.annotation.internalAutowiredAnnotationProcessor",
+	"org.springframework.context.annotation.internalCommonAnnotationProcessor",
+	"org.springframework.context.event.internalEventListenerProcessor",
+	"org.springframework.context.event.internalEventListenerFactory",
+	"myBeanFactoryPostProcessor",
+	"myBeanFactoryPostProcessor2",
+	"myBeanPostProcessor",
+	"userDao",
+	"userDaoImpl3"
+]
+```
 
 ## ApplicationEvent
 
