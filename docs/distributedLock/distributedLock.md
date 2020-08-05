@@ -191,6 +191,8 @@ zookeeper:
 
 ### redis实现
 
+> 参考：https://blog.csdn.net/zzti_erlie/article/details/102884025
+
 ```java
 package com.wykd.jiazhuang.service;
 

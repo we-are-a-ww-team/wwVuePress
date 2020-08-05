@@ -1652,7 +1652,50 @@ idle无值，且未达到最大连接数，则创建新的连接
 
 ## Druid连接池
 
+## Mybatis语句
 
+### 查询近2天的数据
 
+```
+<![CDATA[
+   and t2.created_time < DATE_SUB(now(), interval 24 hour)
+]]>
+```
 
+### Mybatis批量操作
 
+批量更新信息
+
+```xml
+ 
+<!-- 批量更新信息 -->
+    <update id="updateScoreList">
+        update table_1
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="updated_time = now(),name =case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="item.id != null">
+                        when id=#{item.id} then #{item.name}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where id in
+        <foreach collection="list"  item="item" index="index" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+
+    </update>
+```
+
+批量插入记录
+
+```xml
+<!-- 批量插入记录 -->
+    <insert id="insertScoreList">
+        insert into table_1( name ,created_time,updated_time) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.name},now(),now())
+        </foreach>
+    </insert>
+```

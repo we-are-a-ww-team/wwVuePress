@@ -551,7 +551,9 @@ BeanPostProcessor  修改bean实例
 ImportBeanDefinitionRegistrar  传入的参数，DefaultListableBeanFactory，从而修改其中的map中的bean定义
 ```
 
+@Bean @ComponentScan代码示例：
 
+#### ![20200805](./spring.assets/20200805.png)
 
 #### 代码示例
 
@@ -606,6 +608,9 @@ public class MyBeanFactoryPostProcessor2 implements BeanDefinitionRegistryPostPr
         BeanDefinition annotationProcessor = BeanDefinitionBuilder.genericBeanDefinition(UserDaoImpl3.class).getBeanDefinition();
         registry.registerBeanDefinition("userDaoImpl3", annotationProcessor);
 
+       // RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
+//registry.registerBeanDefinition("userDaoImpl3", def);
+        
         System.out.println("1111111111111111");
     }
 
@@ -747,6 +752,85 @@ BeanDefinition的集合
 ]
 ```
 
+
+
+
+
 ## ApplicationEvent
 
 参考：https://www.jianshu.com/p/ef2cee8c5dd1
+
+## WebFlux
+
+### 一个最简单的应用
+
+> Springboot项目
+
+pom.xml
+
+```xml
+ <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.22</version>
+        </dependency>
+```
+
+Controller类方法：
+
+```java
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+@RestController
+@Slf4j
+public class HelloController {
+
+
+    @GetMapping("mono")
+    public Mono<String> mono() {
+        return Mono.just("hello webflux");
+    }
+
+
+    @GetMapping("mono2")
+    public Mono<Object> mono2() {
+
+        return Mono.create(monoSink -> {
+            log.info("创建Mono");
+            monoSink.success("hello webflux");
+        }).doOnSubscribe(subscription -> { //当订阅者去订阅发布者的时候，该方法会调用
+            log.info("订阅==========>" + subscription);
+        }).doOnNext(o -> {      //当订阅者收到数据时，该方法会调用
+            log.info("消费==========>" + o);
+        });
+    }
+
+    @GetMapping("flux")
+    public Flux<String> flux() {
+        return Flux.just("hello","webflux","spring","boot");
+    }
+}
+```
+
+执行：http://localhost:8080/mono2 ，打印结果：
+
+```
+2020-08-04 10:44:43.960  INFO 19416 --- [ctor-http-nio-4] c.w.p.HelloController                    : 订阅==========>MonoSink
+2020-08-04 10:44:43.960  INFO 19416 --- [ctor-http-nio-4] c.w.p.HelloController                    : 创建Mono
+2020-08-04 10:44:43.960  INFO 19416 --- [ctor-http-nio-4] c.w.p.HelloController                    : 消费==========>hello webflux
+```

@@ -10,6 +10,8 @@
 
 参考：https://www.52pojie.cn/thread-1062067-1-1.html
 
+参考2：https://www.cnblogs.com/exmyth/p/12453869.html
+
 ## settings
 
 maven设置：
