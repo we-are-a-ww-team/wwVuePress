@@ -139,6 +139,106 @@ public class SellingReentrantLockTicketService implements Runnable {
 
 
 
+
+
+### Lock源码解读
+
+![1606140207734](./distributedLock.assets/1606140207734.png)
+
+> addWaiter方法：构造双向节点
+>
+> acquireQueued：将等待的节点的线程，阻塞
+
+```java
+public final void acquire(int arg) {
+		
+        if (!tryAcquire(arg)  //获取到锁的线程，返回true 
+            // 未获取到锁的线程，即需要等待的线程继续往下执行
+            && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+            selfInterrupt();
+    }
+```
+
+
+
+```java
+private Node enq(final Node node) {
+        for (;;) {  
+            Node t = tail;
+            if (t == null) { // Must initialize
+                if (compareAndSetHead(new Node()))  //乐观锁，保证只有一个线程初始化成功。
+                    tail = head;
+            } else {
+                node.prev = t;
+                if (compareAndSetTail(t, node)) {
+                    t.next = node;
+                    return t;
+                }
+            }
+        }
+    }
+```
+
+```java
+ final boolean acquireQueued(final Node node, int arg) {
+        boolean failed = true;
+        try {
+            boolean interrupted = false;
+            for (;;) {
+                final Node p = node.predecessor();
+                if (p == head && tryAcquire(arg)) {  //若前节点为head节点，并抢占到锁，则将head节点设置为null，并将当前节点设置为head节点，清除线程，以及pre节点。
+                    setHead(node);
+                    p.next = null; // help GC
+                    failed = false;
+                    return interrupted;
+                }
+                if (shouldParkAfterFailedAcquire(p, node) &&
+                    //阻塞当前线程
+                    parkAndCheckInterrupt())
+                    interrupted = true;
+            }
+        } finally {
+            if (failed)
+                cancelAcquire(node);
+        }
+    }
+```
+
+
+
+```java
+//尝试获得锁
+protected final boolean tryAcquire(int acquires) {
+            final Thread current = Thread.currentThread();
+            int c = getState();
+            if (c == 0) {  //判断锁的状态
+                if (!hasQueuedPredecessors() &&
+                    compareAndSetState(0, acquires)) {  //乐观锁，确保仅一个线程成功修改锁的状态
+                    setExclusiveOwnerThread(current);   //设置获得锁的线程
+                    return true;
+                }
+            }
+            else if (current == getExclusiveOwnerThread()) {
+                //若当前线程再次获得锁，则将状态值+1，实现可重入
+                int nextc = c + acquires;
+                if (nextc < 0)
+                    throw new Error("Maximum lock count exceeded");
+                setState(nextc);
+                return true;
+            }
+    		//若线程未抢到锁，或 不是已获得锁的线程，则返回false
+            return false;
+        }		
+```
+
+
+
+
+
+
+
+
+
 ## 分布式锁
 
 定义一个接口：
