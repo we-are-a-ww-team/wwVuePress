@@ -4,13 +4,13 @@
 
 ## jdk1.7-HashMap源码解读：
 
-> HashMap：数组+链表，
+> 数据结构：数组+链表，
 >
-> ​	  每个数组元素，都是一个链表。即：hash值相同的，存入到同一个数组下标的链表中。也可以理解为：hash值冲突的问题，通过链表解决。   
+> **关键点1**：hash值不同，占用不同的数组下标。
 >
-> ​      hash值不同，占用不同的数组下标。
+> **关键点2**：每个数组元素，都是一个链表。即：hash值相同的，存入到同一个数组下标的链表中。也可以理解为：hash值冲突的问题，通过链表解决。   
 >
-> ​      插入元素的个数，不管是数组对象，还是链表对象，都会影响数组的长度，当插入的元素数量超过阈值，数组长度就会扩容2倍。	
+> **关键点3**： 插入元素的个数，不管是数组对象，还是链表对象，都会影响数组的长度，当插入的元素数量超过阈值，数组长度就会扩容2倍。	
 >
 > ​	【transient Entry[] table;】实现了数组效果，查找速度快。
 >
@@ -180,9 +180,9 @@ GET方法解读：
 public V get(Object key) {
     if (key == null)
         return getForNullKey();
-	//计算hash值
+	//1.计算hash值
     int hash = hash(key.hashCode());
-    //从索引的位置，往下遍历，寻找hash值一致的Entry元素，返回Entry元素的value值
+    //2.根据hash值，获取数组下标，遍历下标位置的链表，直至获取与key相同的节点。
     for (Entry<K,V> e = table[indexFor(hash, table.length)];
          e != null;
          e = e.next) {
@@ -198,6 +198,18 @@ public V get(Object key) {
 
 ## jdk1.8-HashMap源码解读：
 
+> 关键点1：当链表的节点大于8，则转换成红黑树
+>
+> 关键点2：链表是尾部插入节点。
+>
+> 关键点3：当节点数大于阈值（容量* 加载因子），扩容*2
+>
+> 关键点4：容量为2的幂次方，原因是在算hash值的时候，方便进行与运算（index & index-1）
+>
+> 关键点5：与jdk1.7不同的地方，jdk1.8的节点类改为了Node
+
+
+
 红黑树参考：https://baijiahao.baidu.com/s?id=1641940303518144126&wfr=spider&for=pc
 
 Set方法源码解读
@@ -207,26 +219,27 @@ Set方法源码解读
                    boolean evict) {
         Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
-            //若Node数组为空，则初始化一个Node数组
+            //1.创建Node数组
             n = (tab = resize()).length;
      
         if ((p = tab[i = (n - 1) & hash]) == null)
-            //获取数组下标元素，若该坐标没有元素，则新建一个元素
+            //2.获取数组下标元素，若该坐标没有元素，则新建一个元素
             tab[i] = newNode(hash, key, value, null);
         else {
             Node<K,V> e; K k;
             if (p.hash == hash &&
                 ((k = p.key) == key || (key != null && key.equals(k))))
-                //若数组下标元素，hash值相等，且key值相等，则直接替换
+                //3.1若数组下标元素，hash值相等，且key值相等，则直接替换
                 e = p;
             else if (p instanceof TreeNode)
-                //若数组下标元素是一个树节点类型，则进行树结构处理
+                //3.2若数组下标元素是一个树节点类型，则进行树结构处理
                 e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
             else {
-                //链表处理，算法逻辑，参考jdk1.7版本HashMap
+                //3.3链表处理，算法逻辑，参考jdk1.7版本HashMap
                 for (int binCount = 0; ; ++binCount) {
                     if ((e = p.next) == null) {
-                        p.next = newNode(hash, key, value, null);
+                        //在链表的尾部插入一个节点
+                        p.next = newNode(hash, key, value, null); 
                         if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
                             //如果链表元素的长度>8，则转化成红黑树
                             treeifyBin(tab, hash);
@@ -247,6 +260,7 @@ Set方法源码解读
             }
         }
         ++modCount;
+     	//4.当节点数大于阈值，进行扩容
         if (++size > threshold)
             resize();
         afterNodeInsertion(evict);
@@ -254,4 +268,228 @@ Set方法源码解读
     }
 ```
 
+```java
+ /**
+ *  功能1：初始化数组
+ *  功能2：扩容为2倍
+ */
+ final Node<K,V>[] resize() {
+        Node<K,V>[] oldTab = table;
+        int oldCap = (oldTab == null) ? 0 : oldTab.length;
+        int oldThr = threshold;
+        int newCap, newThr = 0;
+        if (oldCap > 0) {
+            if (oldCap >= MAXIMUM_CAPACITY) {
+                threshold = Integer.MAX_VALUE;
+                return oldTab;
+            }
+            //扩容：左位移1位，比如第1次扩容：10000 --> 100000 即：16->32
+            else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
+                     oldCap >= DEFAULT_INITIAL_CAPACITY)
+                newThr = oldThr << 1; // double threshold  阈值也翻倍
+        }
+        else if (oldThr > 0) // initial capacity was placed in threshold
+            newCap = oldThr;
+        else {               // zero initial threshold signifies using defaults
+            newCap = DEFAULT_INITIAL_CAPACITY; //初始值
+            newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+        }
+        if (newThr == 0) {
+            float ft = (float)newCap * loadFactor;
+            newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
+                      (int)ft : Integer.MAX_VALUE);
+        }
+        threshold = newThr;
+        @SuppressWarnings({"rawtypes","unchecked"})
+     		//初始化一个数组
+            Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
+        table = newTab;
+     
+     	//将节点复制转移到 扩容后的结构中
+        if (oldTab != null) {
+            for (int j = 0; j < oldCap; ++j) {
+                Node<K,V> e;
+                if ((e = oldTab[j]) != null) {
+                    oldTab[j] = null;
+                    if (e.next == null)
+                        newTab[e.hash & (newCap - 1)] = e;
+                    else if (e instanceof TreeNode)
+                        ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
+                    else { // preserve order
+                        Node<K,V> loHead = null, loTail = null;
+                        Node<K,V> hiHead = null, hiTail = null;
+                        Node<K,V> next;
+                        do {
+                            next = e.next;
+                            if ((e.hash & oldCap) == 0) {
+                                if (loTail == null)
+                                    loHead = e;
+                                else
+                                    loTail.next = e;
+                                loTail = e;
+                            }
+                            else {
+                                if (hiTail == null)
+                                    hiHead = e;
+                                else
+                                    hiTail.next = e;
+                                hiTail = e;
+                            }
+                        } while ((e = next) != null);
+                        if (loTail != null) {
+                            loTail.next = null;
+                            newTab[j] = loHead;
+                        }
+                        if (hiTail != null) {
+                            hiTail.next = null;
+                            newTab[j + oldCap] = hiHead;
+                        }
+                    }
+                }
+            }
+        }
+        return newTab;
+    }
+```
+
+## Hashtable
+
+```java
+ public synchronized V put(K key, V value) {
+        // Make sure the value is not null
+        if (value == null) {
+            throw new NullPointerException();
+        }
+
+        // Makes sure the key is not already in the hashtable.
+        Entry<?,?> tab[] = table;
+        int hash = key.hashCode();
+        int index = (hash & 0x7FFFFFFF) % tab.length;
+        @SuppressWarnings("unchecked")
+        Entry<K,V> entry = (Entry<K,V>)tab[index];
+        for(; entry != null ; entry = entry.next) {
+            if ((entry.hash == hash) && entry.key.equals(key)) {
+                V old = entry.value;
+                entry.value = value;
+                return old;
+            }
+        }
+
+        addEntry(hash, key, value, index);
+        return null;
+    }
+```
+
+
+
 ## ConcurrentMap源码解读：
+
+> 关键点1：创建数组，头结点赋值，增加节点
+>
+> 关键点2：与HashTable最大的不同，HashTable的粒度是整个put方法，ConcurrentMap的粒度是数组下标的链表/红黑树。
+
+```java
+ final V putVal(K key, V value, boolean onlyIfAbsent) {
+        if (key == null || value == null) throw new NullPointerException();
+        int hash = spread(key.hashCode());
+        int binCount = 0;
+        for (Node<K,V>[] tab = table;;) {
+            Node<K,V> f; int n, i, fh;
+            if (tab == null || (n = tab.length) == 0)
+                //1.初始化数组，
+                tab = initTable();
+            else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
+                //2.数组头结点赋值。
+                //判断i下标的节点是空，则赋值new Node()
+                //casTabAt 实现了原子性，只有一个线程成功
+                if (casTabAt(tab, i, null,
+                             new Node<K,V>(hash, key, value, null)))
+                    break;                   // no lock when adding to empty bin
+            }
+            else if ((fh = f.hash) == MOVED)
+                //当正在扩容时，该线程帮助 转移节点。
+                tab = helpTransfer(tab, f);
+            else {
+                V oldVal = null;
+                //在头节点加锁，控制范围为数组下标的链表/红黑树
+                synchronized (f) {
+                    if (tabAt(tab, i) == f) {
+                        if (fh >= 0) {
+                            binCount = 1;
+                            //遍历链表，
+                            for (Node<K,V> e = f;; ++binCount) {
+                                K ek;
+                                //直至hash值，key值都相等，则直接赋值。
+                                if (e.hash == hash &&
+                                    ((ek = e.key) == key ||
+                                     (ek != null && key.equals(ek)))) {
+                                    oldVal = e.val;
+                                    if (!onlyIfAbsent)
+                                        e.val = value;
+                                    break;
+                                }
+                                //若未遍历到节点，则在尾部插入新节点
+                                Node<K,V> pred = e;
+                                if ((e = e.next) == null) {
+                                    pred.next = new Node<K,V>(hash, key,
+                                                              value, null);
+                                    break;
+                                }
+                            }
+                        }
+                        else if (f instanceof TreeBin) {
+                            //黑红树处理逻辑
+                            Node<K,V> p;
+                            binCount = 2;
+                            if ((p = ((TreeBin<K,V>)f).putTreeVal(hash, key,
+                                                           value)) != null) {
+                                oldVal = p.val;
+                                if (!onlyIfAbsent)
+                                    p.val = value;
+                            }
+                        }
+                    }
+                }
+                if (binCount != 0) {
+                    if (binCount >= TREEIFY_THRESHOLD)
+                        treeifyBin(tab, i);
+                    if (oldVal != null)
+                        return oldVal;
+                    break;
+                }
+            }
+        }
+        addCount(1L, binCount);
+        return null;
+    }
+```
+
+
+
+```java
+//初始化数组
+private final Node<K,V>[] initTable() {
+        Node<K,V>[] tab; int sc;
+        while ((tab = table) == null || tab.length == 0) {
+            if ((sc = sizeCtl) < 0)
+                Thread.yield(); // lost initialization race; just spin  
+            else if (U.compareAndSwapInt(this, SIZECTL, sc, -1)) {  //与内存的值比较，只有一个线程成功进入。【HashMap则没有此判断】
+                try {
+                    if ((tab = table) == null || tab.length == 0) {
+                        int n = (sc > 0) ? sc : DEFAULT_CAPACITY;
+                        @SuppressWarnings("unchecked")
+                        //创建一个Node数组
+                        Node<K,V>[] nt = (Node<K,V>[])new Node<?,?>[n];
+                        table = tab = nt;
+                        sc = n - (n >>> 2);
+                    }
+                } finally {
+                    sizeCtl = sc;
+                }
+                break;
+            }
+        }
+        return tab;
+    }
+```
+
