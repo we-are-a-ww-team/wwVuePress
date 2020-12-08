@@ -2,6 +2,188 @@
 
 ## HandWritten-HashMap
 
+```java
+package com.wykd;
+
+public interface WMap<K,V> {
+     V get(K k);
+
+     V set(K k ,V v);
+
+    int size();
+
+    interface Entry<K ,V> {
+         K getKey();
+
+         V getValue();
+    }
+}
+
+```
+
+```java
+package com.wykd;
+
+
+import static java.util.Objects.hash;
+
+public class WHashMap<K,V> implements WMap<K,V> {
+    private static  int DEFAULT_SIZE = 16;
+    private static  double DEFAULT_FACTOR = 0.75;
+    private int size;
+
+    private Entry[] tables ;
+
+    public WHashMap(){
+        this(DEFAULT_SIZE,DEFAULT_FACTOR);
+    }
+
+    public WHashMap(int defaultSize, double defaultFactor) {
+        DEFAULT_SIZE = defaultSize;
+        DEFAULT_FACTOR = defaultFactor;
+        tables = new Entry[DEFAULT_SIZE];
+    }
+
+
+    @Override
+    public V get(K k) {
+
+        int index = whash(k);
+        if(tables[index] == null){  //头结点为空，则直接返回空
+            return null;
+        }
+        return (V) find(k,tables[index]);
+    }
+
+    private V find(K k, Entry<K,V> entry) {
+        if(k == entry.getKey() || k.equals(entry.getKey())){
+            return entry.getValue();
+        }else{
+            if(entry.next != null){
+                return find(k,entry.next);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public V set(K key ,V value) {
+        int index = whash(key);
+        Entry<K,V> entry = tables[index];
+
+        for (Entry<K,V> e = tables[index]; e != null; e = e.next) {
+            //若头结点不为空，则进入此循环，链表往下查找
+            if (e.k == key || key.equals(e.k)) {
+                //若key也相等，则赋新值，返回旧值
+                V oldValue = e.v;
+                e.v = value;
+                return oldValue;
+            }
+        }
+
+        //头结点为空，或 链表未查找到，则新增节点。
+        tables[index] = newEntry(key,value,entry);  //头部插入节点，将头节点往后挪
+        size++;
+
+
+        return (V) tables[index].getValue();
+    }
+
+    /**
+     * 获取下一个索引值
+     * @return
+     */
+    private int nextIndex() {
+        return 0;
+    }
+
+    /**
+     * 创建一个头结点
+     * @return
+     * @param k
+     * @param v
+     */
+    private Entry<K, V> newEntry(K k, V v, Entry<K,V> next) {
+        return new Entry<K,V>(k,v,next);
+    }
+
+    /**
+     * 取下标
+     * @param k
+     * @return
+     */
+    private int whash(K k) {
+        int m = DEFAULT_SIZE;
+        int i = k.hashCode() % m;  //取 mol
+        //hashCode方法有可能为负数
+        return i >= 0 ? i : -i;
+    }
+
+    @Override
+    public int size() {
+        return this.size;
+    }
+
+    class Entry<K,V> implements  WMap.Entry<K,V>{
+
+        K k;
+        V v;
+        Entry<K,V> next;
+
+
+        public Entry(K k,V v, Entry<K,V> next){
+            this.k = k;
+            this.v = v;
+            this.next = next;
+        }
+
+        @Override
+        public K getKey() {
+            return k;
+        }
+
+        @Override
+        public V getValue() {
+            return v;
+        }
+    }
+
+}
+
+		
+```
+
+测试类：
+
+```java
+package com.wykd;
+
+public class TestWHashMap {
+
+    public static void main(String[] args) {
+
+        WMap map = new WHashMap();
+        for (int i = 0; i < 1000; i++) {
+            map.set("老王"+i+"号",i);
+        }
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("老王"+i+"号" + map.get("老王"+i+"号"));
+        }
+        for (int i = 0; i < 1000; i++) {
+            map.set("老王"+i+"号",i+10000);
+        }
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("2222老王"+i+"号" + map.get("老王"+i+"号"));
+        }
+
+        System.out.println(map.size());
+    }
+}
+
+```
+
+
+
 ## jdk1.7-HashMap源码解读：
 
 > 数据结构：数组+链表，
@@ -202,7 +384,7 @@ public V get(Object key) {
 >
 > 关键点2：链表是尾部插入节点。
 >
-> 关键点3：当节点数大于阈值（容量* 加载因子），扩容*2
+> 关键点3：当节点数大于阈值（容量* 加载因子），扩容*2
 >
 > 关键点4：容量为2的幂次方，原因是在算hash值的时候，方便进行与运算（index & index-1）
 >
