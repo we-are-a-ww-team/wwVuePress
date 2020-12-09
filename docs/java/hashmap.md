@@ -278,9 +278,9 @@ public V put(K key, V value) {
      if (key == null)
          //若key为空，则设置空值
          return putForNullKey(value);
-     //1.取hashCode，再进行hash运算得到最终的hash值
+     //1.取hash值
      int hash = hash(key.hashCode());
-     //2.根据hash值计算table索引，索引值尽量分散，且一定小于数组长度。
+     //2.获取下标
      int i = indexFor(hash, table.length);
      //3.从数组取第i个元素；判断是否为空。
      for (Entry<K,V> e = table[i]; e != null; e = e.next) {
@@ -354,6 +354,16 @@ void transfer(Entry[] newTable) {
         }
     }
 }
+
+//获取下标
+/**
+*	数组容量为什么必须是2的n次幂，原因如下：
+*   比如：2^4-1 = 15  即：01111  ，任何的值与01111做“与运算”都会<16. 与取mol的值是同样的效果，但是速度快了很多倍。
+*/
+ static int indexFor(int h, int length) {
+        return h & (length-1);
+    }
+
 ```
 
 GET方法解读：
@@ -673,5 +683,92 @@ private final Node<K,V>[] initTable() {
         }
         return tab;
     }
+```
+
+
+
+## Hash一致性算法
+
+参考：https://blog.csdn.net/u011305680/article/details/79721030
+
+![1607522782590](./hashmap.assets/1607522782590.png)
+
+> **关键点1**：服务器映射到了hash环的某一个位置，key值的hash值，顺时针查找服务器。
+>
+> **关键点2**：当添加了服务器NODE4，则原区域的object2，通过按顺时针迁移的规则，那么object2被迁移到了NODE4中，其它对象还保持着原有的存储位置。
+
+```java
+package hash;  
+
+import java.util.SortedMap;  
+import java.util.TreeMap;  
+
+/** 
+ * 不带虚拟节点的一致性Hash算法 
+ * 重点：1.如何造一个hash环，2.如何在哈希环上映射服务器节点，3.如何找到对应的节点
+ */  
+public class ConsistentHashingWithoutVirtualNode {  
+
+    //待添加入Hash环的服务器列表  
+    private static String[] servers = { "192.168.0.0:111", "192.168.0.1:111",  
+            "192.168.0.2:111", "192.168.0.3:111", "192.168.0.4:111" };  
+
+    //key表示服务器的hash值，value表示服务器  
+    private static SortedMap<Integer, String> sortedMap = new TreeMap<Integer, String>();  
+
+    //程序初始化，将所有的服务器放入sortedMap中  
+    static {  
+        for (int i=0; i<servers.length; i++) {  
+            int hash = getHash(servers[i]);  
+            System.out.println("[" + servers[i] + "]加入集合中, 其Hash值为" + hash);  
+            sortedMap.put(hash, servers[i]);  
+        }  
+        System.out.println();  
+    }  
+
+    //得到应当路由到的结点  
+    private static String getServer(String key) {  
+        //得到该key的hash值  
+        int hash = getHash(key);  
+        //得到大于该Hash值的所有Map  
+        SortedMap<Integer, String> subMap = sortedMap.tailMap(hash);  
+        if(subMap.isEmpty()){  
+            //如果没有比该key的hash值大的，则从第一个node开始  
+            Integer i = sortedMap.firstKey();  
+            //返回对应的服务器  
+            return sortedMap.get(i);  
+        }else{  
+            //第一个Key就是顺时针过去离node最近的那个结点  
+            Integer i = subMap.firstKey();  
+            //返回对应的服务器  
+            return subMap.get(i);  
+        }  
+    }  
+
+    //使用FNV1_32_HASH算法计算服务器的Hash值,这里不使用重写hashCode的方法，最终效果没区别  
+    private static int getHash(String str) {  
+        final int p = 16777619;  
+        int hash = (int) 2166136261L;  
+        for (int i = 0; i < str.length(); i++)  
+            hash = (hash ^ str.charAt(i)) * p;  
+        hash += hash << 13;  
+        hash ^= hash >> 7;  
+        hash += hash << 3;  
+        hash ^= hash >> 17;  
+        hash += hash << 5;  
+
+        // 如果算出来的值为负数则取其绝对值  
+        if (hash < 0)  
+            hash = Math.abs(hash);  
+        return hash;  
+        }  
+
+    public static void main(String[] args) {  
+        String[] keys = {"太阳", "月亮", "星星"};  
+        for(int i=0; i<keys.length; i++)  
+            System.out.println("[" + keys[i] + "]的hash值为" + getHash(keys[i])  
+                    + ", 被路由到结点[" + getServer(keys[i]) + "]");  
+    }  
+} 
 ```
 

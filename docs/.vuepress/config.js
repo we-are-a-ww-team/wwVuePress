@@ -126,9 +126,11 @@ module.exports = {
 				'io',
 				'tomcat',
 				'rpc',
-				'hashmap'
+				'hashmap',
+				'log'
 			],'/database/':[
 				'mysql',
+				'mysql2',
 				'oracle',
 				'mongodb'
 			],'/mybatis/':[
