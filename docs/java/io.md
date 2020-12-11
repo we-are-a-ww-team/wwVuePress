@@ -643,7 +643,7 @@ public class NioClient {
 
 ```
 分别启动服务端，以及客户端，输出结果为：
-疑问：acceptable为5次，writable为5次，但执行了异步多线程的readable为7次？？
+疑问：acceptable为5次，writable为5次,readable可能有较多次，是因为读不到数据即len=-1.
 
 监听数：1
 ========>[{"acceptable":true,}]
@@ -1230,7 +1230,7 @@ buffer.clear()===>	position:0 	 limit:1024 	capacity1024
 
 
 
-
+![1607694880843](./io.assets/1607694880843.png)
 
 ### Channel
 
