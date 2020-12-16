@@ -36,7 +36,7 @@ module.exports = {
 				{ text: '分布式锁', link: '/distributedLock/distributedLock' },
 				{ text: '分布式事务', link: '/distributedTransaction/distributedTransaction' },
 				{ text: 'Mybatis', link: '/mybatis/mybatis' },
-				{ text: '设计模式', link: '/designerPattern/designerPattern' },
+				{ text: '设计模式', link: '/designerPattern/uml' },
             ]
           },
 		  { text: '功能实现',  items: [
@@ -132,8 +132,7 @@ module.exports = {
 				'mysql',
 				'mysql2',
 				'oracle',
-				'mongodb'
-			],'/mybatis/':[
+				'mongodb',
 				'mybatis'
 			],'/handwriting/':[
 				''
