@@ -59,7 +59,7 @@ module.exports = {
 			  { text: '正则表达式', link: '/regex/regex' },
 			  { text: 'Go语言', link: '/go/go' },
 			  { text: 'python语言', link: '/python/python' },
-			  
+			  { text: '面试', link: '/interview/interview' },
             ]
 		  },
 		   
