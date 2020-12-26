@@ -880,7 +880,7 @@ kubectl get nodes
 
 ![1608980333745](./k8s.assets/1608980333745.png)
 
-### 
+
 
 ## 六、work节点初始化
 
