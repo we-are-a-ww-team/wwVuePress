@@ -95,7 +95,8 @@ module.exports = {
 				'nginx',
 				'vm',
 				'docker',
-				'k8s'
+				'k8s',
+				'k8s2',
 			],
 			'/spring/':[
 				'spring',

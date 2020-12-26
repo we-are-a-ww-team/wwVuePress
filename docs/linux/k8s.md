@@ -1,4 +1,4 @@
-# Kubernate
+# Kubernate集群的搭建
 
 ## 一、准备工作：
 
@@ -895,6 +895,16 @@ kubeadm join 192.168.145.129:6443 --token 66r61x.dtoke4qxutnv6esl \
 
 ![1608981151852](./k8s.assets/1608981151852.png)
 
+重新生成token，参考：https://www.cnblogs.com/winstom/p/11684921.html
+
 ### 6.3 成功加入集群效果图：
 
 ![1608981845791](./k8s.assets/1608981845791.png)
+
+### 6.4 新节点加入，查看子节点加入命令，进入master窗口，执行语句：
+
+```
+kubeadm token create --print-join-command
+```
+
+![1608983924114](./k8s.assets/1608983924114.png)
