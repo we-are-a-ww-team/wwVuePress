@@ -14,7 +14,11 @@
 
 ## 一、查看虚拟机ip
 
-### 1.1 yum执行报错1
+### 1.1 无法ping通www.baidu.com，需要设置IP
+
+https://blog.csdn.net/qq_41606300/article/details/108750302
+
+### 1.2 yum执行报错1
 
 > 新创建的虚拟机，执行yum install docker报错：Loaded plugins: fastestmirror
 
@@ -22,7 +26,7 @@
 
 
 
-### 1.2 yum执行报错2
+### 1.3 yum执行报错2
 
 > 执行yum install docker报错：could not retrieve mirrorlist http://mirrorlist.centos.org ***”
 
@@ -30,13 +34,13 @@
 
 
 
-### 1.3 用yum安装ifconfig
+### 1.4 用yum安装ifconfig
 
 参考：https://www.cnblogs.com/dxqNet/p/11479395.html
 
 
 
-### 1.4 宿主机连接虚拟机
+### 1.5 宿主机连接虚拟机
 
 解决办法：防火墙开放80端口
 

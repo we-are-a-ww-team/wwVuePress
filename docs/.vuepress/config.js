@@ -35,8 +35,8 @@ module.exports = {
 				{ text: '中间件', link: '/middleware/' },
 				{ text: '分布式锁', link: '/distributedLock/distributedLock' },
 				{ text: '分布式事务', link: '/distributedTransaction/distributedTransaction' },
-				{ text: 'Mybatis', link: '/mybatis/mybatis' },
 				{ text: '设计模式', link: '/designerPattern/uml' },
+				{ text: '数据库', link: '/database/mysql' },
             ]
           },
 		  { text: '功能实现',  items: [
@@ -51,12 +51,9 @@ module.exports = {
 			]
 		  },
 		  { text: '其他',  items: [
-			  { text: 'Linux相关', link: '/linux/linux' },
-			  { text: 'Docker容器', link: '/docker/docker' },
-			  { text: '数据库', link: '/database/mysql' },
-			  { text: '开发工具', link: '/developTools/idea' },
+			  { text: '运维相关', link: '/linux/linux' },
 			  { text: '项目构建', link: '/buildProject/' },
-			  { text: '正则表达式', link: '/regex/regex' },
+			  { text: '开发工具', link: '/developTools/idea' },
 			  { text: 'Go语言', link: '/go/go' },
 			  { text: 'python语言', link: '/python/python' },
 			  { text: '面试', link: '/interview/interview' },
@@ -73,10 +70,6 @@ module.exports = {
 			],
 			'/jquery/':[
 				''
-			],
-			'/docker/':[
-				'docker',
-				'k8s'
 			],
 			'/developTools/':[
 				'idea'
@@ -100,7 +93,9 @@ module.exports = {
 			'/linux/':[
 				'linux',
 				'nginx',
-				'vm'
+				'vm',
+				'docker',
+				'k8s'
 			],
 			'/spring/':[
 				'spring',
