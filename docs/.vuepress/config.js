@@ -104,7 +104,8 @@ module.exports = {
 				'springAOP',
 				'springMVC'
 			],'/springboot/':[
-				'springboot'
+				'springboot',
+				'springboot_webflux',
 			],'/springcloud/':[
 				'springcloud'
 			],'/springcloudalibaba/':[

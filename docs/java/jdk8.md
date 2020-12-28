@@ -1,8 +1,10 @@
 # JDK8新特性
 
-## 函数式接口类
+![1609159337305](jdk8.assets/./1609159337305.png)
 
-### Function
+## 常见函数式接口类1：
+
+### 转换类型：Function
 
 > 源码解读：
 
@@ -13,7 +15,7 @@ public interface Function<T, R> {
 }
 ```
 
-### Predicate
+### 判断类型：Predicate
 
 ```java
 @FunctionalInterface
@@ -22,7 +24,7 @@ public interface Predicate<T> {
 }
 ```
 
-### Consumer
+### 消费类型：Consumer
 
 ```java
 @FunctionalInterface
@@ -31,7 +33,13 @@ public interface Consumer<T> {
 }
 ```
 
-### Supplier
+```
+list.forEach(result -> { System.out.println(result)});
+```
+
+
+
+### 生产类型：Supplier
 
 ```java
 @FunctionalInterface
@@ -39,6 +47,8 @@ public interface Supplier<T> {
     T get();
 }
 ```
+
+## 常见函数式接口类2：
 
 ### Runnable
 
@@ -138,8 +148,28 @@ public class TestComparator {
 
 
 
-## Stream运算
 
 
+## 经典例子：
 
-## 时间运算
+### 聚合reduce
+
+```java
+ Stream.of(0,1,2,3,4,5,6,7,8,9)
+                .reduce(Integer::sum)  //聚合求和
+                .ifPresent(System.out::println);
+```
+
+```
+ //BigDecimal
+        List<BigDecimal> decimals = new LinkedList<>();
+        decimals.add(BigDecimal.valueOf(5.9));
+        decimals.add(BigDecimal.valueOf(1.0));
+        decimals.add(BigDecimal.valueOf(19.79));
+        decimals.add(BigDecimal.valueOf(3.2));
+        decimals.add(BigDecimal.valueOf(5.7));
+
+        BigDecimal sum = decimals.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        System.out.println(sum);
+```
+
