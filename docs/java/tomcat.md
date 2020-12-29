@@ -6,7 +6,7 @@
 
 ## 手写简易版框架
 
-[手写简易版Tomcat](/java/handwriter_tomcat.html)
+[手写简易版Tomcat](/handwriting/handwriter_tomcat.html)
 
 ## Tomcat源码项目构建
 

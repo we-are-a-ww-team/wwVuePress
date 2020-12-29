@@ -92,6 +92,18 @@ nohup java -jar JrebelBrainsLicenseServerforJava-1.0-SNAPSHOT-jar-with-dependenc
 
 
 
+## 控制台乱码问题解决
+
+1.增加 -Dfile.encoding=UTF-8
+
+![1609253833251](./idea.assets/1609253833251.png)
+
+2. 设置编码格式
+
+![1609253891233](./idea.assets/1609253891233.png)
+
+
+
 ## 热门插件
 
 **打印最终的sql：Mybatis-log-plugin**
