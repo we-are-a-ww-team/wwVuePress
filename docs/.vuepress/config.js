@@ -71,6 +71,12 @@ module.exports = {
 			'/jquery/':[
 				''
 			],
+			'/designerPattern/':[
+				'uml',
+				'pattern_singerton',
+				'pattern_factory',
+				'pattern_build',
+			],
 			'/developTools/':[
 				'idea'
 			],
