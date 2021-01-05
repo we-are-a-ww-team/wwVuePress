@@ -16,9 +16,11 @@
 	Alt+insert  	get/set等
 	Alt+enter		自动修正 ,引入class
 	Ctrl+Shift+Space   自动补全代码
+	.var			增加属性定义
 	Ctrl＋Alt＋T	   代码添加try/catch
 	
 	Ctrl+B		    方法实现及调用
+	Alt+F8			Debug模式，可查看变量的值
 	
 	Ctrl+N			查找类
 	Ctrl+Shift+F	全局检索（包括源码）

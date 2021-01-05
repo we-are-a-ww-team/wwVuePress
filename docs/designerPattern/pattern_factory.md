@@ -93,3 +93,4 @@ class TestSimpleFactory {
 
 ## 抽象工厂模式
 
+![1609509256658](./pattern_factory.assets/1609509256658.png)
