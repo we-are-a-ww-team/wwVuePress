@@ -8,11 +8,13 @@
 
 ## JVM内存模型
 
+![1614173387218](./jvm.assets/1614173387218.png)
+
 ![img](./jvm.assets/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAxNy85LzQvZGQzYjE1YjNkODgyNmZhZWFlMjA2Mzk3NmZiOTkyMTM_aW1hZ2VWaWV3Mi8wL3cvMTI4MC9oLzk2MC9mb3JtYXQvd2VicC9pZ25vcmUtZXJyb3IvMQ.jpg)
 
 ### JVM内存存放分析
 
-- 方法区：线程共享，运行时常量池。存储**基本类型常量**（public static final），**静态方法，静态变量**（static变量），class
+- 方法区：线程共享，包含“运行时常量池”。存储**基本类型常量**（public static final），**静态方法，静态变量**（static变量），class
 - 堆（heap）：线程共享，存储**new的对象（注意：不是对象引用，是对象本身），数组**
 - 栈（stack）：线程独有，存储**局部变量**，**对象的引用**
 
@@ -22,20 +24,7 @@
 
 ![img](./jvm.assets/f3d3572c11dfa9ec028d9199c8f0f206908fc147.jpeg)
 
-### 成员变量和局部变量的区别
 
-- 在类中的位置不同
-  - 成员变量：类中方法外
-  - 局部变量：方法定义中或者方法声明
-- 在内存中的位置不同
-  - 成员变量：在堆中
-  - 局部变量：在栈中
-- 生命周期不同
-  - 成员变量：随着对象的创建而存在，随着对象的消失而消失
-  - 局部变量：随着方法的调用而存在，随着方法的调用完毕而消失
-- 初始化值不同
-  - 成员变量：有默认值
-  - 局部变量：没有默认值，必须定义，赋值，然后才能使用
 
 ## 栈内存
 
@@ -43,7 +32,7 @@
 >
 > 1.程序计数器。
 >
-> 2.虚拟机栈：每一个方法，会启用一个栈帧。每个栈帧包括：**局部变量表，操作数栈**，动态连接等
+> 2.虚拟机栈：每一个方法，会启用一个栈帧，并先后压入虚拟机栈中。每个栈帧包括：**局部变量表，操作数栈**，动态连接等
 >
 > ​		2.1 注：**基本数据类型**（char、byte、short、int、long、float、double、boolean）就是存放在局部变量表中。
 >
@@ -215,9 +204,13 @@ Exception in thread "main" java.lang.StackOverflowError
 >
 > 1.新生代，包括：Eden空间，From survivor空间 ，To survivor空间.  
 >
-> ​		1.1 Eden空间不够，会触发MinorGC，对象移入交换区（From，To）.
+> ​		1.1 Eden空间不够，会触发MinorGC，未被回收的对象移入交换区（From，To）.  第2次minorGC开始在from,to之间复制
+>
+> ​        1.2  survivor可以认为是缓冲区，设置2个缓冲区是为了解决碎片内存问题，如下图
 >
 > ​		1.2 MinorGC后，对象在交换区的年龄加1，当超过15次后，晋升到老年代。
+>
+> ![1614175440816](./jvm.assets/1614175440816.png)
 >
 > 2.老年代
 >
@@ -230,7 +223,13 @@ Exception in thread "main" java.lang.StackOverflowError
 | -Xms | 初始堆内存 |
 | -Xmx | 最大堆内存 |
 
+### 回收复制算法
 
+minor gc 时，from->to，先将from区的对象进行gc回收，无法回收的对象，复制到to区，然后将from清空。
+
+下一次minor gc 时，to->from，先将to区的对象进行gc回收，无法回收的对象，复制到from区，然后将to清空。
+
+每次执行了回收复制算法后，无法回收的对象，年龄+1，15次仍然未被回收的对象，转入老年代。
 
 ## GC ROOT 可达性分析算法
 
@@ -244,18 +243,6 @@ GC Roots 对象包括如下几种：
 - 虚拟机栈中，栈桢中的局部变量引用的对象；
 - 方法区中的静态变量和常量引用的对象
 - 已启动且未停止的 Java 线程。
-
-
-
-## 回收复制算法：
-
-在进行minor gc 算法时，from->to，先将from区的对象进行gc回收，无法回收的对象，复制到to区，然后将from清空。
-
-每次执行了回收复制算法后，无法回收的对象，年龄+1，15次仍然未被回收的对象，转入老年代。
-
-
-
-
 
 
 

@@ -151,6 +151,9 @@ module.exports = {
 				'server2client'
 			],'/sourceCode/':[
 				''
+			],'/interview/':[
+				'interview',
+				'interview2'
 			]
 		},
 		blogConfig: {

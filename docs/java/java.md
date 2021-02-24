@@ -311,3 +311,9 @@ UTF-8
 ```
 
 ## ApplicationEvent
+
+
+
+## 双亲委派原则
+
+参考：https://www.jianshu.com/p/09f73af48a98
