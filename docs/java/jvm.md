@@ -34,7 +34,11 @@
 >
 > 2.虚拟机栈：每一个方法，会启用一个栈帧，并先后压入虚拟机栈中。每个栈帧包括：**局部变量表，操作数栈**，动态连接等
 >
-> ​		2.1 注：**基本数据类型**（char、byte、short、int、long、float、double、boolean）就是存放在局部变量表中。
+> ​		2.1 基本数据类型（char、byte、short、int、long、float、double、boolean）就是存放在局部变量表中。
+>
+> ​       2.2  引用类型
+>
+>        2.3  操作数栈是执行引擎的工作区，执行引擎类似于CPU，负责运算，比如加减乘除等
 >
 > 3.本地方法栈：native方法，调用系统的C语言方法，可通过linux命令查看，如：man 2 select
 
@@ -65,7 +69,13 @@ public class JVMTest {
 
 字节码反编译结果为：
 
-字节码指令，参考：https://www.cnblogs.com/longjee/p/8675771.html
+字节码指令集1：
+
+参考：https://www.cnblogs.com/longjee/p/8675771.html
+
+字节码指令集2：
+
+https://cloud.tencent.com/developer/article/1333540
 
 ```
 Classfile /D:/Alex_Java/workspace/idea_workspace/wykd-java/ww-basic/src/main/java/com/wykd/jvm/JVMTest.class
@@ -126,7 +136,7 @@ Constant pool:
          4: istore_2						//将栈顶的变量取出，移入局部变量表的2号位置
          5: iload_1							//将局部变量表的1号变量，压入栈顶
          6: iload_2							//将局部变量表的2号变量，压入栈顶
-         7: imul							//取出并计算栈顶的2个变量，并压入栈顶
+         7: imul							//取出并计算栈顶的2个变量，将计算结果压入栈顶
          8: istore_3						//将栈顶的变量取出，移入局部变量表的3号位置
          9: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
         12: iload_3							//从局变量的3号位置，取出变量，并压入栈顶
@@ -142,6 +152,8 @@ Constant pool:
 SourceFile: "JVMTest.java"
 
 ```
+
+![1614260743647](./jvm.assets/1614260743647.png)
 
 ### 内存异常分析
 

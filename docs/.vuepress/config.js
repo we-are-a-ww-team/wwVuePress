@@ -56,7 +56,7 @@ module.exports = {
 			  { text: '开发工具', link: '/developTools/idea' },
 			  { text: 'Go语言', link: '/go/go' },
 			  { text: 'python语言', link: '/python/python' },
-			  { text: '面试', link: '/interview/interview' },
+			  { text: '面试', link: '/interview/' },
             ]
 		  },
 		   
