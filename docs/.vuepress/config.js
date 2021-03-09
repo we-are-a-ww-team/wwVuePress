@@ -16,6 +16,11 @@ module.exports = {
 	theme: 'reco',
 	themeConfig: {
 		author: 'wwei',
+		keyPage: {
+		  keys: ['e23b0ff3bedc1e823b1ad8e63dfb83c4'], // 1.3.0 版本后需要设置为密文
+		  color: '#42b983', // 登录页动画球的颜色
+		  lineColor: '#42b983' // 登录页动画线的颜色
+		},
         nav: [
           { text: 'Home', link: '/' },
 		  { text: '前端技术', 
