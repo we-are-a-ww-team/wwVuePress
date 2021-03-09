@@ -18,27 +18,43 @@
 - 堆（heap）：线程共享，存储**new的对象（注意：不是对象引用，是对象本身），数组**
 - 栈（stack）：线程独有，存储**局部变量**，**对象的引用**
 
-#### 具体例子分析：
+### 具体例子分析：
 
 ![img](./jvm.assets/359b033b5bb5c9ea023ba6fe7e19b3053bf3b38c.jpeg)
 
 ![img](./jvm.assets/f3d3572c11dfa9ec028d9199c8f0f206908fc147.jpeg)
 
+## 堆外内存（直接内存）
+
+Unsafe直接操作直接内存
+
+EHcache  中间件
+
+## 方法区
+
+> 常量池：运行时常量池，静态常量池
+>
+> class文件
+>
+> 元空间
+
 
 
 ## 栈内存
 
+> 每个线程，会开启一个虚拟机栈。
+>
+> 每个虚拟机栈，默认1M大小；若栈内存溢出，可适量增加栈大小（XSS），同时也会减少高并发数量。
+>
 > 栈内存包括3个方面：
 >
 > 1.程序计数器。
 >
-> 2.虚拟机栈：每一个方法，会启用一个栈帧，并先后压入虚拟机栈中。每个栈帧包括：**局部变量表，操作数栈**，动态连接等
+> 2.虚拟机栈：每一个方法，会启用一个栈帧，并先后压入虚拟机栈中。
 >
-> ​		2.1 基本数据类型（char、byte、short、int、long、float、double、boolean）就是存放在局部变量表中。
+> ​		2.1 局部变量表包含：基本数据类型，引用类型
 >
-> ​       2.2  引用类型
->
->        2.3  操作数栈是执行引擎的工作区，执行引擎类似于CPU，负责运算，比如加减乘除等
+> ​		2.2  操作数栈是执行引擎的工作区，执行引擎类似于CPU，负责运算，比如加减乘除等
 >
 > 3.本地方法栈：native方法，调用系统的C语言方法，可通过linux命令查看，如：man 2 select
 
@@ -163,7 +179,7 @@ SourceFile: "JVMTest.java"
 >
 > 解决办法：减少单个线程占用的的内存容量；一个线程默认占用1M内存；将Xss改小，除了能解决异常，还能增加并发线程数的能力。
 
-#### StackOverflowError代码演示：
+### StackOverflowError代码演示：
 
 ```java
 package com.wykd.jvm;
@@ -235,6 +251,54 @@ Exception in thread "main" java.lang.StackOverflowError
 | -Xms | 初始堆内存 |
 | -Xmx | 最大堆内存 |
 
+
+
+OutOfMemory代码示例
+
+```java
+package com.wykd.jvm;
+
+public class TestOutOfMemory {
+
+    /**
+     * -Xms30m -Xmx30m -XX:+PrintGCDetails
+     * @param args
+     *
+     * 情况1:分配的空间不够
+     * 情况2：GC占据98%，只回收了2%的内存
+     */
+    public static void main(String[] args) {
+        String[] strings = new String[10*1024*1024];
+    }
+
+}
+
+```
+
+```java
+[GC (Allocation Failure) [PSYoungGen: 2334K->904K(9216K)] 2334K->912K(29696K), 0.0014293 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC (Allocation Failure) [PSYoungGen: 904K->856K(9216K)] 912K->864K(29696K), 0.0014071 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (Allocation Failure) [PSYoungGen: 856K->0K(9216K)] [ParOldGen: 8K->779K(20480K)] 864K->779K(29696K), [Metaspace: 3445K->3445K(1056768K)], 0.0069764 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC (Allocation Failure) [PSYoungGen: 0K->0K(9216K)] 779K->779K(29696K), 0.0003802 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (Allocation Failure) [PSYoungGen: 0K->0K(9216K)] [ParOldGen: 779K->761K(20480K)] 779K->761K(29696K), [Metaspace: 3445K->3445K(1056768K)], 0.0085538 secs] [Times: user=0.03 sys=0.00, real=0.02 secs] 
+Heap
+ PSYoungGen      total 9216K, used 246K [0x00000000ff600000, 0x0000000100000000, 0x0000000100000000)
+  eden space 8192K, 3% used [0x00000000ff600000,0x00000000ff63d890,0x00000000ffe00000)
+  from space 1024K, 0% used [0x00000000ffe00000,0x00000000ffe00000,0x00000000fff00000)
+  to   space 1024K, 0% used [0x00000000fff00000,0x00000000fff00000,0x0000000100000000)
+ ParOldGen       total 20480K, used 761K [0x00000000fe200000, 0x00000000ff600000, 0x00000000ff600000)
+  object space 20480K, 3% used [0x00000000fe200000,0x00000000fe2be648,0x00000000ff600000)
+ Metaspace       used 3477K, capacity 4496K, committed 4864K, reserved 1056768K
+  class space    used 379K, capacity 388K, committed 512K, reserved 1048576K
+Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+	at com.wykd.jvm.TestOutOfMemory.main(TestOutOfMemory.java:13)
+
+Process finished with exit code 1
+
+```
+
+
+
 ### 回收复制算法
 
 minor gc 时，from->to，先将from区的对象进行gc回收，无法回收的对象，复制到to区，然后将from清空。
@@ -243,18 +307,7 @@ minor gc 时，from->to，先将from区的对象进行gc回收，无法回收的
 
 每次执行了回收复制算法后，无法回收的对象，年龄+1，15次仍然未被回收的对象，转入老年代。
 
-## GC ROOT 可达性分析算法
-
-> - GC Roots是一些由堆外指向堆内的引用：
-> - 将一系列被称为GC Roots的变量作为初始的存活对象合集，然后从该合集出发，所有能够被该集合引用到的对象，并将其加入到该集合中，而不能被该合集所引用到的对象，并可对其宣告死亡。
-
-
-
-GC Roots 对象包括如下几种：
-
-- 虚拟机栈中，栈桢中的局部变量引用的对象；
-- 方法区中的静态变量和常量引用的对象
-- 已启动且未停止的 Java 线程。
+- 
 
 
 
@@ -279,5 +332,31 @@ GC Root无法回收的对象，就会造成内存泄露。
 
         return oldValue;
     }
+```
+
+## GC ROOT 可达性分析算法
+
+> - GC Roots是一些由堆外指向堆内的引用：
+> - 将一系列被称为GC Roots的变量作为初始的存活对象合集，然后从该合集出发，所有能够被该集合引用到的对象，并将其加入到该集合中，而不能被该合集所引用到的对象，并可对其宣告死亡。
+
+
+
+GC Roots 对象包括如下几种：
+
+- 虚拟机栈中，栈桢中的局部变量引用的对象；
+- 方法区中的静态变量和常量引用的对象
+- 已启动且未停止的 Java 线程。
+
+**手动触发gc**:
+
+```
+system.gc();
+```
+
+**打印gc信息**
+
+```
+-XX:+PrintGC
+-XX:+PrintGCDetails
 ```
 

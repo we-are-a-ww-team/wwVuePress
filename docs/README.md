@@ -1,11 +1,11 @@
 ---
 home: true
-heroText: 欢迎加入wykd社区1
-tagline: 开发人员的好帮手
-actionText: Vue快速上手 →
-actionLink: /vue/
+heroText: 欢迎加入wykd社区
+tagline: 程序猿技术博客
+actionText: 常用网站 →
+actionLink: /link/
 features:
-  - title: 简洁至上
+  - title: 简洁至上1
     details: 以 Markdown 为中心的项目结构，以最少的配置帮助你专注于写作。
   - title: Vue驱动
     details: 享受 Vue + webpack 的开发体验，在 Markdown 中使用 Vue 组件，同时可以使用 Vue 来开发自定义主题。
@@ -15,12 +15,4 @@ footer: © 2019 - 2020   |  wykd Technology Co. Ltd.             ICP备案证书
 ---
 
 
-
-[jenkins](http://120.24.170.89:8080)  
-
-[halo](http://120.24.87.121:8090/admin/index.html#/dashboard)  admin 12345678
-
-[rocketmq_console](http://120.24.87.121:8099/#/)
-
-[yapi](http://120.24.170.89:3000/group/11)
 
