@@ -8,3 +8,9 @@
 
 [禅道](http://120.24.170.89:8065/index.php)
 
+
+
+
+
+[享学课堂论坛](http://bbs.xiangxueketang.cn/pins/recommended)
+

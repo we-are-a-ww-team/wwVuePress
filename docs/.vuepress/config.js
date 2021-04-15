@@ -62,12 +62,16 @@ module.exports = {
 			  { text: 'Go语言', link: '/go/go' },
 			  { text: 'python语言', link: '/python/python' },
 			  { text: '面试', link: '/interview/' },
+			  { text: '区块链', link: '/blockchain/' },
             ]
 		  },
 		   
         ],
 		sidebarDepth: 2,
 		sidebar: {
+			'/blockchain/':[
+				'blockchain'
+			],
 			'/regex/':[
 				'regex'
 			],'/vue/':[

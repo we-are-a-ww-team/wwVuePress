@@ -1,5 +1,9 @@
 # JDK8新特性
 
+## lambada
+
+参考链接：https://www.zhihu.com/question/20125256/answer/324121308
+
 ![1609159337305](jdk8.assets/./1609159337305.png)
 
 ## 常见函数式接口类1：

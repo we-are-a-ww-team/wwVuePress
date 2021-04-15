@@ -1,0 +1,284 @@
+[
+  {
+    "index": 0,
+    "name": "公共分类",
+    "desc": "公共分类",
+    "add_time": 1615444293,
+    "up_time": 1615444293,
+    "list": [
+      {
+        "query_path": {
+          "path": "/api/admin/attachments",
+          "params": [
+            {
+              "_id": "6049de1a65256e7c7091ace1",
+              "name": "page",
+              "value": "0"
+            },
+            {
+              "_id": "6049de1a65256e660b91ace0",
+              "name": "size",
+              "value": "18"
+            },
+            {
+              "_id": "6049de1a65256e744691acdf",
+              "name": "keyword",
+              "value": "lunbo"
+            }
+          ]
+        },
+        "edit_uid": 0,
+        "status": "undone",
+        "type": "static",
+        "req_body_is_json_schema": true,
+        "res_body_is_json_schema": true,
+        "api_opened": false,
+        "index": 0,
+        "tag": [],
+        "_id": 563,
+        "method": "GET",
+        "catid": 39,
+        "title": "获取轮播图片",
+        "path": "/api/admin/attachments?page=0&size=18&keyword=lunbo",
+        "project_id": 46,
+        "req_params": [],
+        "res_body_type": "json",
+        "req_query": [
+          {
+            "required": "1",
+            "_id": "6049de1a65256e336191acdd",
+            "name": "page",
+            "example": "0",
+            "desc": ""
+          },
+          {
+            "required": "1",
+            "_id": "6049de1a65256e307f91acdc",
+            "name": "size",
+            "example": "100",
+            "desc": ""
+          },
+          {
+            "required": "1",
+            "_id": "6049de1a65256e8d6091acdb",
+            "name": "keyword",
+            "example": "kingknow_slideshow",
+            "desc": "关键字"
+          }
+        ],
+        "req_headers": [
+          {
+            "required": "1",
+            "_id": "6049de1a65256e25f191acde",
+            "name": "Admin-Authorization",
+            "value": "396c684be3204508969df42544f6628a"
+          }
+        ],
+        "req_body_form": [],
+        "desc": "<p>/api/admin/posts/5 //5为文章ID</p>\n<pre><code data-language=\"json\" class=\"lang-json\">{\n&nbsp; \"status\": 200,\n&nbsp; \"message\": \"OK\",\n&nbsp; \"devMessage\": null,\n&nbsp; \"data\": {\n&nbsp;&nbsp;&nbsp; \"content\": [\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"id\": 7,\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"name\": \"kingknow_slideshow\",\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"path\": \"[http://120.24.87.121:8091/upload/2021/03/image-192995385abc4cd1840272350a84f715.png](http://120.24.87.121:8091/upload/2021/03/image-192995385abc4cd1840272350a84f715.png)\",     //图片路径\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"fileKey\": \"upload/2021/03/image-192995385abc4cd1840272350a84f715.png\",\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"thumbPath\": \"http://120.24.87.121:8091/upload/2021/03/image-192995385abc4cd1840272350a84f715-thumbnail.png\",\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"mediaType\": \"image/png\",\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"suffix\": \"png\",\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"width\": 849,\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"height\": 500,\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"size\": 160638,\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"type\": \"LOCAL\",\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \"createTime\": 1615452410026\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }\n&nbsp;&nbsp;&nbsp; ],\n&nbsp;&nbsp;&nbsp; \"pages\": 1,\n&nbsp;&nbsp;&nbsp; \"total\": 1,\n&nbsp;&nbsp;&nbsp; \"page\": 0,\n&nbsp;&nbsp;&nbsp; \"rpp\": 100,\n&nbsp;&nbsp;&nbsp; \"hasNext\": false,\n&nbsp;&nbsp;&nbsp; \"hasPrevious\": false,\n&nbsp;&nbsp;&nbsp; \"isFirst\": true,\n&nbsp;&nbsp;&nbsp; \"isLast\": true,\n&nbsp;&nbsp;&nbsp; \"isEmpty\": false,\n&nbsp;&nbsp;&nbsp; \"hasContent\": true\n&nbsp; }\n}\n</code></pre>\n",
+        "markdown": "/api/admin/posts/5 //5为文章ID\n\n``` json\n{\n  \"status\": 200,\n  \"message\": \"OK\",\n  \"devMessage\": null,\n  \"data\": {\n    \"content\": [\n      {\n        \"id\": 7,\n        \"name\": \"kingknow_slideshow\",\n        \"path\": \"[http://120.24.87.121:8091/upload/2021/03/image-192995385abc4cd1840272350a84f715.png](http://120.24.87.121:8091/upload/2021/03/image-192995385abc4cd1840272350a84f715.png)\",     //图片路径\n        \"fileKey\": \"upload/2021/03/image-192995385abc4cd1840272350a84f715.png\",\n        \"thumbPath\": \"http://120.24.87.121:8091/upload/2021/03/image-192995385abc4cd1840272350a84f715-thumbnail.png\",\n        \"mediaType\": \"image/png\",\n        \"suffix\": \"png\",\n        \"width\": 849,\n        \"height\": 500,\n        \"size\": 160638,\n        \"type\": \"LOCAL\",\n        \"createTime\": 1615452410026\n      }\n    ],\n    \"pages\": 1,\n    \"total\": 1,\n    \"page\": 0,\n    \"rpp\": 100,\n    \"hasNext\": false,\n    \"hasPrevious\": false,\n    \"isFirst\": true,\n    \"isLast\": true,\n    \"isEmpty\": false,\n    \"hasContent\": true\n  }\n}\n```",
+        "res_body": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{}}",
+        "uid": 11,
+        "add_time": 1615453519,
+        "up_time": 1615453722,
+        "__v": 0
+      },
+      {
+        "query_path": {
+          "path": "/api/admin/login",
+          "params": []
+        },
+        "edit_uid": 0,
+        "status": "undone",
+        "type": "static",
+        "req_body_is_json_schema": true,
+        "res_body_is_json_schema": true,
+        "api_opened": false,
+        "index": 0,
+        "tag": [],
+        "_id": 554,
+        "method": "POST",
+        "catid": 39,
+        "title": "获取验证token",
+        "path": "/api/admin/login",
+        "project_id": 46,
+        "req_params": [],
+        "res_body_type": "json",
+        "uid": 11,
+        "add_time": 1615445113,
+        "up_time": 1615445802,
+        "req_query": [],
+        "req_headers": [
+          {
+            "required": "1",
+            "_id": "6049bf2a65256ebfcf91ac92",
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "req_body_form": [],
+        "__v": 0,
+        "desc": "<p>入参：<br>\n{\"username\":\"admin\",\"password\":\"wangwei2048\",\"authcode\":null}</p>\n<p>返回结果：<br>\n{<br>\n&nbsp; \"status\": 200,<br>\n&nbsp; \"message\": \"OK\",<br>\n&nbsp; \"devMessage\": null,<br>\n&nbsp; \"data\": {<br>\n&nbsp;&nbsp;&nbsp; \"access_token\": \"5dba38e5bbb648f9821833610411972d\",&nbsp; &nbsp; &nbsp;// 该结果作为其他接口的header必传，参数名为：Admin-Authorization<br>\n&nbsp;&nbsp;&nbsp; \"expired_in\": 86400,<br>\n&nbsp;&nbsp;&nbsp; \"refresh_token\": \"ce0b71dd4c4c4e6c9ce173f4e97d43f2\"<br>\n&nbsp; }<br>\n}</p>\n",
+        "markdown": "入参：\n{\"username\":\"admin\",\"password\":\"wangwei2048\",\"authcode\":null}\n\n返回结果：\n{\n  \"status\": 200,\n  \"message\": \"OK\",\n  \"devMessage\": null,\n  \"data\": {\n    \"access_token\": \"5dba38e5bbb648f9821833610411972d\",     // 该结果作为其他接口的header必传，参数名为：Admin-Authorization\n    \"expired_in\": 86400,\n    \"refresh_token\": \"ce0b71dd4c4c4e6c9ce173f4e97d43f2\"\n  }\n}",
+        "res_body": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"number\"},\"message\":{\"type\":\"string\"},\"devMessage\":{\"type\":\"null\"},\"data\":{\"type\":\"object\",\"properties\":{\"access_token\":{\"type\":\"string\",\"description\":\"// 该结果作为其他接口的header必传，参数名为：Admin-Authorization\"},\"expired_in\":{\"type\":\"number\"},\"refresh_token\":{\"type\":\"string\"}}}}}",
+        "req_body_other": "{\"username\":\"admin\",\"password\":\"wangwei2048\",\"authcode\":null}",
+        "req_body_type": "raw"
+      },
+      {
+        "query_path": {
+          "path": "/api/admin/menus/team/tree_view",
+          "params": []
+        },
+        "edit_uid": 0,
+        "status": "undone",
+        "type": "static",
+        "req_body_is_json_schema": true,
+        "res_body_is_json_schema": true,
+        "api_opened": false,
+        "index": 1,
+        "tag": [],
+        "_id": 551,
+        "method": "GET",
+        "catid": 39,
+        "title": "获取菜单集合",
+        "path": "/api/admin/menus/team/tree_view",
+        "project_id": 46,
+        "req_params": [],
+        "res_body_type": "json",
+        "uid": 11,
+        "add_time": 1615444324,
+        "up_time": 1615450457,
+        "req_query": [
+          {
+            "required": "1",
+            "_id": "6049d15965256e08f591acc5",
+            "name": "team",
+            "example": "kingknow",
+            "desc": "分组"
+          }
+        ],
+        "req_headers": [
+          {
+            "required": "1",
+            "_id": "6049d15965256e4d0791acc6",
+            "name": "Admin-Authorization",
+            "value": "cd095f2cebbf4583a8466c2252a08654"
+          }
+        ],
+        "req_body_form": [],
+        "__v": 0,
+        "desc": "<pre><code data-language=\"json\" class=\"lang-json\">{\n  \"status\": 200,\n  \"message\": \"OK\",\n  \"devMessage\": null,\n  \"data\": [\n    {\n      \"id\": 12,\n      \"name\": \"HOME\",\n      \"url\": \"/home\",\n      \"priority\": 0,\n      \"target\": \"_self\",\n      \"icon\": \"\",\n      \"parentId\": 0,\n      \"team\": \"kingknow\",\n      \"children\": []\n    },\n    {\n      \"id\": 13,\n      \"name\": \"PRODUCTS\",\n      \"url\": \"/product\",     //一级菜单\n      \"priority\": 0,\n      \"target\": \"_self\",\n      \"icon\": \"\",\n      \"parentId\": 0,\n      \"team\": \"kingknow\",     //类型\n      \"children\": [         //二级菜单\n        {\n          \"id\": 15,\n          \"name\": \"Massage Gun\",    //显示名称\n          \"url\": \"/massageGun\",    //路径\n          \"priority\": 0,\n          \"target\": \"_self\",\n          \"icon\": \"\",\n          \"parentId\": 13,\n          \"team\": \"kingknow\",\n          \"children\": []\n        },\n        {\n          \"id\": 16,\n          \"name\": \"Blackhead Removel\",\n          \"url\": \"/blackheadRemovel\",\n          \"priority\": 0,\n          \"target\": \"_self\",\n          \"icon\": \"\",\n          \"parentId\": 13,\n          \"team\": \"kingknow\",\n          \"children\": []\n        }\n      ]\n    },\n    {\n      \"id\": 14,\n      \"name\": \"ABOUT US\",\n      \"url\": \"/aboutus\",\n      \"priority\": 0,\n      \"target\": \"_self\",\n      \"icon\": \"\",\n      \"parentId\": 0,\n      \"team\": \"kingknow\",\n      \"children\": []\n    }\n  ]\n}\n</code></pre>\n",
+        "markdown": "``` json\n{\n  \"status\": 200,\n  \"message\": \"OK\",\n  \"devMessage\": null,\n  \"data\": [\n    {\n      \"id\": 12,\n      \"name\": \"HOME\",\n      \"url\": \"/home\",\n      \"priority\": 0,\n      \"target\": \"_self\",\n      \"icon\": \"\",\n      \"parentId\": 0,\n      \"team\": \"kingknow\",\n      \"children\": []\n    },\n    {\n      \"id\": 13,\n      \"name\": \"PRODUCTS\",\n      \"url\": \"/product\",     //一级菜单\n      \"priority\": 0,\n      \"target\": \"_self\",\n      \"icon\": \"\",\n      \"parentId\": 0,\n      \"team\": \"kingknow\",     //类型\n      \"children\": [         //二级菜单\n        {\n          \"id\": 15,\n          \"name\": \"Massage Gun\",    //显示名称\n          \"url\": \"/massageGun\",    //路径\n          \"priority\": 0,\n          \"target\": \"_self\",\n          \"icon\": \"\",\n          \"parentId\": 13,\n          \"team\": \"kingknow\",\n          \"children\": []\n        },\n        {\n          \"id\": 16,\n          \"name\": \"Blackhead Removel\",\n          \"url\": \"/blackheadRemovel\",\n          \"priority\": 0,\n          \"target\": \"_self\",\n          \"icon\": \"\",\n          \"parentId\": 13,\n          \"team\": \"kingknow\",\n          \"children\": []\n        }\n      ]\n    },\n    {\n      \"id\": 14,\n      \"name\": \"ABOUT US\",\n      \"url\": \"/aboutus\",\n      \"priority\": 0,\n      \"target\": \"_self\",\n      \"icon\": \"\",\n      \"parentId\": 0,\n      \"team\": \"kingknow\",\n      \"children\": []\n    }\n  ]\n}\n```",
+        "res_body": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"number\"},\"message\":{\"type\":\"string\"},\"devMessage\":{\"type\":\"null\"},\"data\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"number\"},\"name\":{\"type\":\"string\"},\"url\":{\"type\":\"string\"},\"priority\":{\"type\":\"number\"},\"target\":{\"type\":\"string\"},\"icon\":{\"type\":\"string\"},\"parentId\":{\"type\":\"number\"},\"team\":{\"type\":\"string\"},\"children\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"number\"},\"name\":{\"type\":\"string\"},\"url\":{\"type\":\"string\"},\"priority\":{\"type\":\"number\"},\"target\":{\"type\":\"string\"},\"icon\":{\"type\":\"string\"},\"parentId\":{\"type\":\"number\"},\"team\":{\"type\":\"string\"},\"children\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"id\",\"name\",\"url\",\"priority\",\"target\",\"icon\",\"parentId\",\"team\",\"children\"]}}},\"required\":[\"id\",\"name\",\"url\",\"priority\",\"target\",\"icon\",\"parentId\",\"team\",\"children\"]}}}}"
+      },
+      {
+        "query_path": {
+          "path": "/api/admin/posts",
+          "params": []
+        },
+        "edit_uid": 0,
+        "status": "undone",
+        "type": "static",
+        "req_body_is_json_schema": true,
+        "res_body_is_json_schema": true,
+        "api_opened": false,
+        "index": 2,
+        "tag": [],
+        "_id": 560,
+        "method": "GET",
+        "catid": 39,
+        "title": "根据菜单ID获取产品列表",
+        "path": "/api/admin/posts  ",
+        "project_id": 46,
+        "req_params": [],
+        "res_body_type": "json",
+        "uid": 23,
+        "add_time": 1615449971,
+        "up_time": 1615451523,
+        "req_query": [
+          {
+            "required": "1",
+            "_id": "6049d58365256ec70491acc9",
+            "name": "categoryId",
+            "example": "115",
+            "desc": "菜单id"
+          },
+          {
+            "required": "1",
+            "_id": "6049d58365256e21cb91acc8",
+            "name": "page",
+            "example": "0",
+            "desc": ""
+          },
+          {
+            "required": "1",
+            "_id": "6049d58365256e2e2391acc7",
+            "name": "size",
+            "example": "100",
+            "desc": ""
+          }
+        ],
+        "req_headers": [
+          {
+            "required": "1",
+            "_id": "6049d58365256e37a891acca",
+            "name": "Admin-Authorization",
+            "value": "",
+            "desc": "token"
+          }
+        ],
+        "req_body_form": [],
+        "__v": 0,
+        "desc": "<pre><code data-language=\"json\" class=\"lang-json\">{\n  \"status\": 200,\n  \"message\": \"OK\",\n  \"devMessage\": null,\n  \"data\": {\n    \"content\": [\n      {\n        \"id\": 5,\n        \"title\": \"K-AJ-EM003\",    //显示名称\n        \"status\": \"PUBLISHED\",\n        \"slug\": \"k-aj-em003\",\n        \"editorType\": \"MARKDOWN\",\n        \"updateTime\": 1615447975213,\n        \"createTime\": 1615446788189,\n        \"editTime\": 1615447975207,\n        \"metaKeywords\": null,\n        \"metaDescription\": null,\n        \"fullPath\": \"http://120.24.87.121:8091/archives/k-aj-em003\",\n        \"summary\": \"K-AJ-EM003\\nMotor：20W\\nProduct Size：17.5*7*23.5cm\\nColor：black/silver/red/blue/gold/green\\nBattery Power：24V 1500mah/2500mah\\nBattery Disassembly：Yes\\nCharge Time：2h\\nInput Voltage：DC 100-240V 50/60Hz 0.8A\\nBeat Range：12mm\\nSwitching Mode：Power switch + LCD screen\\nGear Mode：20 speed adjustment\\nFrequency：1200-3200\\nMassage Head：6 massage heads\",\n        \"thumbnail\": \"http://www.kingknowtech.com/img/massage_gun/EM003_1.jpg\",  //缩略图\n        \"visits\": 4,\n        \"disallowComment\": false,\n        \"password\": \"\",\n        \"template\": \"\",\n        \"topPriority\": 0,\n        \"likes\": 0,\n        \"wordCount\": 106,\n        \"commentCount\": 0,\n        \"tags\": [],\n        \"categories\": [\n          {\n            \"id\": 6,\n            \"name\": \"Massage Gun\",\n            \"slug\": \"massagegun\",\n            \"description\": \"\",\n            \"thumbnail\": \"\",\n            \"parentId\": 5,\n            \"password\": null,\n            \"createTime\": 1615446553750,\n            \"fullPath\": \"http://120.24.87.121:8091/categories/massagegun\"\n          }\n        ],\n        \"metas\": {},\n        \"topped\": false\n      }\n    ],\n    \"pages\": 1,\n    \"total\": 1,\n    \"page\": 0,\n    \"rpp\": 10,\n    \"hasNext\": false,\n    \"hasPrevious\": false,\n    \"isFirst\": true,\n    \"isLast\": true,\n    \"isEmpty\": false,\n    \"hasContent\": true\n  }\n}\n</code></pre>\n",
+        "markdown": "``` json\n{\n  \"status\": 200,\n  \"message\": \"OK\",\n  \"devMessage\": null,\n  \"data\": {\n    \"content\": [\n      {\n        \"id\": 5,\n        \"title\": \"K-AJ-EM003\",    //显示名称\n        \"status\": \"PUBLISHED\",\n        \"slug\": \"k-aj-em003\",\n        \"editorType\": \"MARKDOWN\",\n        \"updateTime\": 1615447975213,\n        \"createTime\": 1615446788189,\n        \"editTime\": 1615447975207,\n        \"metaKeywords\": null,\n        \"metaDescription\": null,\n        \"fullPath\": \"http://120.24.87.121:8091/archives/k-aj-em003\",\n        \"summary\": \"K-AJ-EM003\\nMotor：20W\\nProduct Size：17.5*7*23.5cm\\nColor：black/silver/red/blue/gold/green\\nBattery Power：24V 1500mah/2500mah\\nBattery Disassembly：Yes\\nCharge Time：2h\\nInput Voltage：DC 100-240V 50/60Hz 0.8A\\nBeat Range：12mm\\nSwitching Mode：Power switch + LCD screen\\nGear Mode：20 speed adjustment\\nFrequency：1200-3200\\nMassage Head：6 massage heads\",\n        \"thumbnail\": \"http://www.kingknowtech.com/img/massage_gun/EM003_1.jpg\",  //缩略图\n        \"visits\": 4,\n        \"disallowComment\": false,\n        \"password\": \"\",\n        \"template\": \"\",\n        \"topPriority\": 0,\n        \"likes\": 0,\n        \"wordCount\": 106,\n        \"commentCount\": 0,\n        \"tags\": [],\n        \"categories\": [\n          {\n            \"id\": 6,\n            \"name\": \"Massage Gun\",\n            \"slug\": \"massagegun\",\n            \"description\": \"\",\n            \"thumbnail\": \"\",\n            \"parentId\": 5,\n            \"password\": null,\n            \"createTime\": 1615446553750,\n            \"fullPath\": \"http://120.24.87.121:8091/categories/massagegun\"\n          }\n        ],\n        \"metas\": {},\n        \"topped\": false\n      }\n    ],\n    \"pages\": 1,\n    \"total\": 1,\n    \"page\": 0,\n    \"rpp\": 10,\n    \"hasNext\": false,\n    \"hasPrevious\": false,\n    \"isFirst\": true,\n    \"isLast\": true,\n    \"isEmpty\": false,\n    \"hasContent\": true\n  }\n}\n```",
+        "res_body": "{\"type\":\"object\",\"title\":\"empty object\",\"properties\":{}}"
+      },
+      {
+        "query_path": {
+          "path": "/api/admin/posts/{postid}",
+          "params": []
+        },
+        "edit_uid": 0,
+        "status": "undone",
+        "type": "var",
+        "req_body_is_json_schema": true,
+        "res_body_is_json_schema": true,
+        "api_opened": false,
+        "index": 3,
+        "tag": [],
+        "_id": 557,
+        "method": "GET",
+        "catid": 39,
+        "title": "获取产品详细信息",
+        "path": "/api/admin/posts/{postid}",
+        "project_id": 46,
+        "req_params": [
+          {
+            "_id": "6049d13e65256e5d9691acc4",
+            "name": "postid",
+            "example": "5",
+            "desc": "文章id"
+          }
+        ],
+        "res_body_type": "json",
+        "uid": 23,
+        "add_time": 1615446933,
+        "up_time": 1615450430,
+        "req_query": [],
+        "req_headers": [
+          {
+            "required": "1",
+            "_id": "6049d13e65256e351191acc3",
+            "name": "Admin-Authorization",
+            "value": "396c684be3204508969df42544f6628a"
+          }
+        ],
+        "req_body_form": [],
+        "__v": 0,
+        "desc": "<p>/api/admin/posts/5 //5为文章ID</p>\n<pre><code data-language=\"json\" class=\"lang-json\">{\n  \"status\": 200,\n  \"message\": \"OK\",\n  \"devMessage\": null,\n  \"data\": {\n    \"id\": 5,            //编号\n    \"title\": \"K-AJ-EM003\",   //显示名称\n    \"status\": \"DRAFT\",\n    \"slug\": \"k-aj-em003\",    //别名\n    \"editorType\": \"MARKDOWN\",\n    \"updateTime\": 1615446826320,\n    \"createTime\": 1615446788189,\n    \"editTime\": 1615446826314,\n    \"metaKeywords\": null,\n    \"metaDescription\": null,\n    \"fullPath\": \"http://120.24.87.121:8091/archives/k-aj-em003\",      //文章访问路径\n    \"summary\": \"K-AJ-EM003\\nMotor：20W\\nProduct Size：17.5*7*23.5cm\\nColor：black/silver/red/blue/gold/green\\nBattery Power：24V 1500mah/2500mah\\nBattery Disassembly：Yes\\nCharge Time：2h\\nInput Voltage：DC 100-240V 50/60Hz 0.8A\\nBeat Range：12mm\\nSwitching Mode：Power switch + LCD screen\\nGear Mode：20 speed adjustment\\nFrequency：1200-3200\\nMassage Head：6 massage heads\",   //摘要\n    \"thumbnail\": \"http://www.kingknowtech.com/img/massage_gun/EM003_1.jpg\",    //产品缩略图\n    \"visits\": 2,\n    \"disallowComment\": false,\n    \"password\": \"\",\n    \"template\": \"\",\n    \"topPriority\": 0,\n    \"likes\": 0,\n    \"wordCount\": 106,\n    \"originalContent\": \"K-AJ-EM003是一款按摩枪\\n![1.jpg](http://120.24.87.121:8091/upload/2021/03/1-05e40967488841ccbff9293527848463.jpg)\",\n    \"formatContent\": \"&lt;p&gt;K-AJ-EM003是一款按摩枪&lt;br /&gt;\\n&lt;img src=\\\"http://120.24.87.121:8091/upload/2021/03/1-05e40967488841ccbff9293527848463.jpg\\\" alt=\\\"1.jpg\\\" /&gt;&lt;/p&gt;\\n\",   //格式化文章\n    \"commentCount\": 0,\n    \"tagIds\": [],\n    \"tags\": [],\n    \"categoryIds\": [\n      6\n    ],\n    \"categories\": [\n      {\n        \"id\": 6,\n        \"name\": \"Massage Gun\",  //分类\n        \"slug\": \"massagegun\",\n        \"description\": \"\",\n        \"thumbnail\": \"\",\n        \"parentId\": 5,\n        \"password\": null,\n        \"createTime\": 1615446553750,\n        \"fullPath\": \"http://120.24.87.121:8091/categories/massagegun\"\n      }\n    ],\n    \"metaIds\": [],\n    \"metas\": [],\n    \"topped\": false\n  }\n}\n</code></pre>\n",
+        "markdown": "/api/admin/posts/5 //5为文章ID\n\n``` json\n{\n  \"status\": 200,\n  \"message\": \"OK\",\n  \"devMessage\": null,\n  \"data\": {\n    \"id\": 5,            //编号\n    \"title\": \"K-AJ-EM003\",   //显示名称\n    \"status\": \"DRAFT\",\n    \"slug\": \"k-aj-em003\",    //别名\n    \"editorType\": \"MARKDOWN\",\n    \"updateTime\": 1615446826320,\n    \"createTime\": 1615446788189,\n    \"editTime\": 1615446826314,\n    \"metaKeywords\": null,\n    \"metaDescription\": null,\n    \"fullPath\": \"http://120.24.87.121:8091/archives/k-aj-em003\",      //文章访问路径\n    \"summary\": \"K-AJ-EM003\\nMotor：20W\\nProduct Size：17.5*7*23.5cm\\nColor：black/silver/red/blue/gold/green\\nBattery Power：24V 1500mah/2500mah\\nBattery Disassembly：Yes\\nCharge Time：2h\\nInput Voltage：DC 100-240V 50/60Hz 0.8A\\nBeat Range：12mm\\nSwitching Mode：Power switch + LCD screen\\nGear Mode：20 speed adjustment\\nFrequency：1200-3200\\nMassage Head：6 massage heads\",   //摘要\n    \"thumbnail\": \"http://www.kingknowtech.com/img/massage_gun/EM003_1.jpg\",    //产品缩略图\n    \"visits\": 2,\n    \"disallowComment\": false,\n    \"password\": \"\",\n    \"template\": \"\",\n    \"topPriority\": 0,\n    \"likes\": 0,\n    \"wordCount\": 106,\n    \"originalContent\": \"K-AJ-EM003是一款按摩枪\\n![1.jpg](http://120.24.87.121:8091/upload/2021/03/1-05e40967488841ccbff9293527848463.jpg)\",\n    \"formatContent\": \"<p>K-AJ-EM003是一款按摩枪<br />\\n<img src=\\\"http://120.24.87.121:8091/upload/2021/03/1-05e40967488841ccbff9293527848463.jpg\\\" alt=\\\"1.jpg\\\" /></p>\\n\",   //格式化文章\n    \"commentCount\": 0,\n    \"tagIds\": [],\n    \"tags\": [],\n    \"categoryIds\": [\n      6\n    ],\n    \"categories\": [\n      {\n        \"id\": 6,\n        \"name\": \"Massage Gun\",  //分类\n        \"slug\": \"massagegun\",\n        \"description\": \"\",\n        \"thumbnail\": \"\",\n        \"parentId\": 5,\n        \"password\": null,\n        \"createTime\": 1615446553750,\n        \"fullPath\": \"http://120.24.87.121:8091/categories/massagegun\"\n      }\n    ],\n    \"metaIds\": [],\n    \"metas\": [],\n    \"topped\": false\n  }\n}\n```",
+        "res_body": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"number\"},\"message\":{\"type\":\"string\"},\"devMessage\":{\"type\":\"null\"},\"data\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"number\"},\"title\":{\"type\":\"string\"},\"status\":{\"type\":\"string\"},\"slug\":{\"type\":\"string\"},\"editorType\":{\"type\":\"string\"},\"updateTime\":{\"type\":\"number\"},\"createTime\":{\"type\":\"number\"},\"editTime\":{\"type\":\"number\"},\"metaKeywords\":{\"type\":\"null\"},\"metaDescription\":{\"type\":\"null\"},\"fullPath\":{\"type\":\"string\"},\"summary\":{\"type\":\"string\"},\"thumbnail\":{\"type\":\"string\"},\"visits\":{\"type\":\"number\"},\"disallowComment\":{\"type\":\"boolean\"},\"password\":{\"type\":\"string\"},\"template\":{\"type\":\"string\"},\"topPriority\":{\"type\":\"number\"},\"likes\":{\"type\":\"number\"},\"wordCount\":{\"type\":\"number\"},\"originalContent\":{\"type\":\"string\"},\"formatContent\":{\"type\":\"string\"},\"commentCount\":{\"type\":\"number\"},\"tagIds\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"categoryIds\":{\"type\":\"array\",\"items\":{\"type\":\"number\"}},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"number\"},\"name\":{\"type\":\"string\"},\"slug\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"},\"thumbnail\":{\"type\":\"string\"},\"parentId\":{\"type\":\"number\"},\"password\":{\"type\":\"null\"},\"createTime\":{\"type\":\"number\"},\"fullPath\":{\"type\":\"string\"}}}},\"metaIds\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"metas\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"topped\":{\"type\":\"boolean\"}}}}}"
+      }
+    ]
+  }
+]
