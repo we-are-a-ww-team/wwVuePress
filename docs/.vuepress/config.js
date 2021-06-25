@@ -163,6 +163,8 @@ module.exports = {
 			],'/interview/':[
 				'interview',
 				'interview2'
+			],'/server/':[
+				''
 			]
 		},
 		blogConfig: {

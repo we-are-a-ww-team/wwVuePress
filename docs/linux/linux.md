@@ -28,6 +28,8 @@ cp 		复制
 # 文本查找
 find ./ -name nginx
 find /etc -name　'init*'　　在/etc目录找init开头的文件
+# 查找当前目录，文件中含有mono字眼的文件
+find ./  -type f |xargs grep *mono*
 
 # 内容查找
 # -i 忽略大小写   -n 显示行号  从nohup.out中找出jvm的行
