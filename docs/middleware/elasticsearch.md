@@ -277,6 +277,22 @@ PUT http://192.168.113.128:9200/accounts/person/OboSeHIBHqYqLAHVMdGv
 
 
 
+修改某个字段，
+
+> id后加：【_update】
+>
+> 固定写法：【doc】
+
+```
+# 修改
+POST /woailuo/zhongguo/KQpLPnoBGIkfibfTB7Nn/_update
+{
+    "doc":{"data" : {"aaa":"222"}}
+}
+```
+
+
+
 ### 查询一个用户
 
 ```
@@ -769,6 +785,135 @@ public class BookRepositoryTest {
 }
 
 ```
+
+### RestHighLevelClient
+
+```xml
+ <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>6.8.16</version>
+        </dependency>
+```
+
+```java
+
+@Configuration
+public class HighlevelClientConfig{
+    public static final RequestOptions COMMON_OPTIONS;
+    static {
+        RequestOptions.Builder builder = RequestOptions.DEFAULT.toBuilder();
+        COMMON_OPTIONS = builder.build();
+    }
+    /**
+     *方式一：无账号密码连接方式
+     **/
+    @Bean
+    public RestHighLevelClient esRestClient(){
+        RestHighLevelClient client = new RestHighLevelClient(
+                RestClient.builder(
+//                        new HttpHost("localhost", 9200, "http"),
+                        //集群配置法  http://120.24.170.89:9200
+                        new HttpHost("120.24.170.89", 9200, "http")));
+        return client;
+    }
+
+}
+```
+
+
+
+```java
+ @GetMapping("/test2")
+    public String test2(){
+
+        Client client = elasticsearchTemplate.getClient();
+        GetResponse response = client.prepareGet("book", "book", "zcvgiHIBBtMsYtNUJZFY").get();
+        System.out.println(response.getSource());
+
+        return response.getSourceAsString();
+    }
+
+    @Autowired
+    private RestHighLevelClient restHighLevelClient;
+
+
+
+    @GetMapping("/test4")
+    public String test4(){
+
+        JSONObject jsonObject2 = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject2.put("bbb","777");
+        jsonObject.put("data",jsonObject2);
+
+        UpdateRequest updateRequest = new UpdateRequest("woailuo","zhongguo","KQpLPnoBGIkfibfTB7Nn").doc(jsonObject);
+
+        try {
+            UpdateResponse update = restHighLevelClient.update(updateRequest,RequestOptions.DEFAULT);
+            if(update.status().getStatus() == 200){
+                System.out.println("修改成功！！！！");
+            }else {
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String result = "";
+        GetRequest request = new GetRequest("woailuo","zhongguo", "KQpLPnoBGIkfibfTB7Nn");
+        try {
+            GetResponse response = restHighLevelClient.get(request, RequestOptions.DEFAULT);
+            Map<String, Object> sourceAsMap = response.getSourceAsMap();
+            System.out.println(JSON.toJSONString(sourceAsMap));
+            result= JSON.toJSONString(sourceAsMap);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+/**
+* 查询时间区间
+*/
+ @GetMapping("/test5")
+    public String test5() throws IOException {
+        BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("createdTime"); //新建range条件
+        rangeQueryBuilder.gte("2021-06-01"); //开始时间
+        rangeQueryBuilder.lte("2021-06-02"); //结束时间
+        rangeQueryBuilder.format("yyyy-MM-dd");
+        boolBuilder.must(rangeQueryBuilder);
+        sourceBuilder.query(boolBuilder); //设置查询，可以是任何类型的QueryBuilder。
+        sourceBuilder.from(0); //设置确定结果要从哪个索引开始搜索的from选项，默认为0
+        sourceBuilder.size(100); //设置确定搜素命中返回数的size选项，默认为10
+        sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS)); //设置一个可选的超时，控制允许搜索的时间。
+
+
+//        sourceBuilder.fetchSource(new String[]{"fields.port", "fields.entity_id", "fields.message"}, new String[]{}); //第一个是获取字段，第二个是过滤的字段，默认获取全部
+        SearchRequest searchRequest = new SearchRequest("time"); //索引
+        searchRequest.types("ranger"); //类型
+        searchRequest.source(sourceBuilder);
+// 打印请求体
+        System.out.println(searchRequest.source().toString());
+// 打印返回体
+
+        SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+
+        System.out.println(response.toString());
+
+        SearchHits hits = response.getHits();  //SearchHits提供有关所有匹配的全局信息，例如总命中数或最高分数：
+        SearchHit[] searchHits = hits.getHits();
+        for (SearchHit hit : searchHits) {
+            log.info("search -> {}", hit.getSourceAsString());
+        }
+        return Arrays.toString(searchHits);
+    }
+```
+
+
+
+
 
 ## 基本信息查看命令
 
